@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-38503881-9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-38503881-9');
+</script>
+
+
+
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Zaitoon Offers</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+
+    <!-- Angular -->
+    <script src="assets/js/jquery.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-cookies.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-route.js"></script>
+    <script src="controllers/deals.js?version=1.0.1"></script>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="assets/css/zaitoon.min.css" rel="stylesheet">
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/icons/apple-touch-icon-144-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/icons/apple-touch-icon-114-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/icons/apple-touch-icon-72-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" href="assets/icons/apple-touch-icon-57-precomposed.png">
+  <link rel="shortcut icon" href="assets/icons/favicon.png">
+
+  <link href="dist/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+      		<!-- Loading Script -->
+		<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> -->
+		<style>
+			#loading {
+	    			position: absolute; 
+	    			width: 100%; height: 100%; 
+	    			background: url('assets/images/common/ripple.svg') no-repeat center center;
+	    			background-size: 80px 80px;
+	    			background-color: rgba(0, 0, 0, 0.4);	    			
+	    			z-index: 100;
+			}
+		</style>		
+		<script>
+			$(window).ready(function() {
+				$('#loading').hide();
+			});		
+		</script>
+		
+		
+		
+
+
+    <script>
+    
+
+  function logoutNow(){
+    if(getCookie("user")){
+      document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location = "login/";
+    }
+  }
+  
+      function callSetLocation(){
+        if(localStorage.getItem("location")){
+          var temp = JSON.parse(localStorage.getItem("location"));
+          if(temp.location == null || temp.location == "" || !temp.location){
+            $('#warnLocation').modal('show');
+          }
+        }
+      }
+      
+      function changeCity(){
+        $('#warnLocation').modal('show');
+      }
+      
+        
+    function handleTick(cb) {
+      localStorage.setItem("isTakeAway", cb.checked);
+      renderCart();
+    }
+  
+  //Cart stuff
+function deleteFromCart(code) {
+            var info = JSON.parse(localStorage.getItem("itemsInfo"));
+            //var x = info[0].itemQuantity +1
+            var i = 0;
+            var flag = -1;
+            while(i<info.length)
+            {
+                //checks if item aldready in cart and returns the position of that object if exists
+                if(info[i].itemCode==code)
+                {
+                    flag = i;
+                    break;
+                }
+                i++;
+            }
+            var item = JSON.parse(localStorage.itemsInfo);
+            item.splice(flag, 1);
+            localStorage.setItem("itemsInfo", JSON.stringify(item));
+            renderCart();
+        }
+        function minusFunction(code) {
+            //document.getElementById("item_count_12").innerHTML  = "red";
+            var info = JSON.parse(localStorage.getItem("itemsInfo"));
+            //var x = info[0].itemQuantity +1
+            var i = 0;
+            var flag = -1;
+            while(i<info.length)
+            {
+                //checks if item aldready in cart and returns the position of that object if exists
+                if(info[i].itemCode==code)
+                {
+                    flag = i;
+                    break;
+                }
+                i++;
+            }
+            var item = JSON.parse(localStorage.itemsInfo);
+            if(item[flag].qty > 1){
+                item[flag].qty -=1;
+                localStorage.setItem("itemsInfo", JSON.stringify(item));
+            }
+            else{
+                item.splice(flag, 1);
+                localStorage.setItem("itemsInfo", JSON.stringify(item));
+            }
+            renderCart();
+        }
+        function addFunction(code) {
+            var info = JSON.parse(localStorage.getItem("itemsInfo"));
+            //var x = info[0].itemQuantity +1
+            var i = 0;
+            var flag = -1;
+            while(i<info.length)
+            {
+                //checks if item aldready in cart and returns the position of that object if exists
+                if(info[i].itemCode==code)
+                {
+                    flag = i;
+                    break;
+                }
+                i++;
+            }
+            var item = JSON.parse(localStorage.itemsInfo);
+            item[flag].qty +=1;
+            localStorage.setItem("itemsInfo", JSON.stringify(item));
+            renderCart();
+
+        }
+          
+  
+
+
+//HELP LINE STUFF
+         function getHelp(){
+	      $('#helpWindow').modal('show'); 
+	      var temp_user_info = "";
+	      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		     		      
+		      document.getElementById("helpName").value = temp_user_info.name;
+		      document.getElementById("helpEmail").value = temp_user_info.email;
+		      document.getElementById("helpMobile").value = temp_user_info.mobile;
+	      }
+	  }
+	  
+	  function submitHelp(){
+	  
+	  	document.getElementById("helpError").innerHTML = "";
+	  	
+	  	var data = {};
+	  	data.name = document.getElementById("helpName").value;
+	  	data.email = document.getElementById("helpEmail").value;
+	  	data.mobile = document.getElementById("helpMobile").value;
+	  	data.comment = document.getElementById("helpComment").value;
+	  	
+	  	if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+		       data.type = "GENERAL";
+		       data.reference = "";
+		}
+		else{
+		       data.type = "REFUND";
+		       data.reference = document.getElementById("helpPaymentReference").value;		
+		}
+		
+
+	  	
+		//Validations
+		if(!(/^[a-zA-Z\s]*$/.test(data.name))){
+			document.getElementById("helpError").innerHTML = "Names can contain only letters";
+		}
+		else if(!(/^\d{10}$/).test(data.mobile)){
+			document.getElementById("helpError").innerHTML = "Mobile Number has to be 10 digit number";
+		}
+		else if((data.comment).length < 10){
+			document.getElementById("helpError").innerHTML = "Please elaborate your query";
+		}
+		else if((data.comment).length > 500){
+			document.getElementById("helpError").innerHTML = "Comments can not contain more than 500 characters";
+		}
+		else if(data.comment == 'The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razorpay Payment ID for your reference.' && data.type == 'REFUND'){
+			document.getElementById("helpError").innerHTML = "Please edit the date and time of placing the order, order amount etc. in comments";
+		}
+		else if(data.type == 'REFUND' && (data.reference).length < 1){
+			document.getElementById("helpError").innerHTML = "Add 'Payment Reference ID' from Razorpay";
+		}
+		else{ //Pass		      
+		      $('#loading').show();
+		      var temp_user_info = "";
+		      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		      	
+		      	data.token = temp_user_info.token;
+		      }
+		      $.ajax({
+		          type: 'POST',
+		          url: 'https://www.accelerateengine.app/food-engine/apis/submitquery.php',
+		          data: JSON.stringify(data),
+		          contentType: "application/json",
+		          dataType: 'json',
+		          success: function(data) {
+		             $('#loading').hide();
+		             if(data.status){
+		                document.getElementById("mainHelpContent").innerHTML = '<p style="font-size: 21px;font-weight: 200;color: #74d29c;padding: 80px 30px;text-align: center;">We have received your message.<br>Your concern will be addressed soon!</p>';
+		                setTimeout(function(){ $('#helpWindow').modal('hide');}, 4000);
+		             }
+		             else{
+		                document.getElementById("helpError").innerHTML = data.error;
+		             }
+		          }
+		      });
+      
+		}
+	  
+	  }
+	  
+    // Check log in
+    function goCheckout(){
+      var temp_location = JSON.parse(localStorage.getItem("location"));
+      if (!temp_location) temp_location = [];
+
+      if(getCookie("user")){
+        window.location = "checkout.html";
+      }
+      else{
+        window.location = "/login";
+      }
+    }
+    	  
+	  
+	  
+	function renderCart(){
+
+        //Is the outlet open?
+        var isOutletClosed = localStorage.getItem("isOutletClosed");        
+
+        //is it a take away?
+        var isTakeAway = false;
+        var takeawayBar = '';
+        if(localStorage.getItem("isTakeAway")){
+          isTakeAway = localStorage.getItem("isTakeAway");
+          if(isTakeAway == 'true'){
+            takeawayBar = '<div class="checkbox" style="color: #c52031; font-size: 16px;"> <label style="padding-left: 3px"> <input type="checkbox" value="" onclick="handleTick(this)" checked> <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span> Is it a Take Away? </label> </div>';
+          }
+          else{
+            takeawayBar = '<div class="checkbox" style="color: #c52031; font-size: 16px;"> <label style="padding-left: 3px"> <input type="checkbox" value="" onclick="handleTick(this)"> <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span> Is it a Take Away? </label> </div>';
+          }
+        }
+        else{
+          takeawayBar = '<div class="checkbox" style="color: #c52031; font-size: 16px;"> <label style="padding-left: 3px"> <input type="checkbox" value="" onclick="handleTick(this)"> <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span> Is it a Take Away? </label> </div>';
+        }
+
+        //Only take away possible if not deliverable area
+        if(localStorage.getItem("isDeliveryAvailable") == 'false'){
+          localStorage.setItem("isTakeAway", true);
+          takeawayBar = '<div class="checkbox" style="color: #c52031; font-size: 16px;"> <label style="padding-left: 3px"> <input type="checkbox" value="1" checked disabled> <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span> Is it a Take Away? </label> </div><p style = "color:#e67e22; font-size=10px;">Order can not be delivered to your area. Take Away Only.</p>';
+        }
+
+
+        //Outlet info available?
+        var isOutletSet = false;
+        //var outletInfo = [];
+        if(localStorage.getItem("outletInfo") != null){
+          isOutletSet = true;
+          var outletInfo = JSON.parse(localStorage.getItem("outletInfo"));
+        }
+        else{
+          isOutletSet = false;
+        }
+
+
+        var row = "";
+        if (localStorage.getItem("itemsInfo") != null && JSON.parse(localStorage.getItem("itemsInfo")).length != 0) // If the cart is not empty.
+        {
+
+        var info = JSON.parse(localStorage.getItem("itemsInfo"));
+        var sub_total = 0;
+        var i = 0;
+
+        while(i<info.length)   {
+
+            //Jugaad to hide border in the first row.
+            var noBorder = "";
+            if(i == 0){noBorder = 'style="border-top:none; padding-top: 20px;"'}
+
+             row = row +'<tr><td class="crossIcon" '+noBorder+'> <div onclick="deleteFromCart('+info[i].itemCode+')"><i class="fa fa-times-circle"></i></div> </td> <td class="cartDescription" '+noBorder+'> <p style="font-size: 14px; color: #34495e">'+info[i].itemName+'</p>';
+             row = row + '<p style="font-size: 11px; color: grey; margin-top: -10px;"><i class="fa fa-inr"></i> '+info[i].itemPrice+'</p>';
+             if(info[i].isCustom)
+             {
+                row = row + '<p style="font-size: 9px; color: #1abc9c; margin-top: -10px;">Choice: '+info[i].variant+'</p>';
+             }
+             row = row + '</td> <td class="cart_quantity" '+noBorder+'> <div class="cartButtons"> <i class="fa fa-minus-circle zaitoonCartMenuMinus" aria-hidden="true" onclick="minusFunction('+info[i].itemCode+')"></i><span id="item_count_12"> '+info[i].qty+' </span><i class="fa fa-plus-circle zaitoonCartMenuPlus" aria-hidden="true" onclick="addFunction('+info[i].itemCode+')"></i> </div> </td> </tr>';
+             sub_total += (info[i].qty*info[i].itemPrice);
+             i++;
+        }
+        
+        
+        document.getElementById("quickCartCount").innerHTML = i;
+        
+
+
+	//TAX AND DELIVERY CHARGES
+        var extras = "";
+        
+        var stateTaxRender = "";
+        var centralTaxRender = "";
+        var containerChargesRender = "";
+        
+        var amountStateTax = 0;
+        var amountCentralTax = 0;
+        var amountContainer = 0;        
+
+        if(!isOutletSet){
+          if(isTakeAway == 'true'){
+              amountContainer = (sub_total*.05).toFixed(2);
+              containerChargesRender = '<tr class="shipping-cost"> <td><grey>Delivery Charges (5%)</grey></td> <td><grey><i class="fa fa-inr"></i> '+amountContainer+'</grey></td> </tr>'
+          }
+          else {
+              amountContainer = (sub_total*.07).toFixed(2);
+              containerChargesRender = '<tr class="shipping-cost"> <td><grey>Delivery Charges (7%)</grey></td> <td><grey><i class="fa fa-inr"></i> '+amountContainer+'</grey></td> </tr>'
+          }
+        }
+        else{
+        
+          //State Tax Info.
+          if(outletInfo.isStateTaxCollected){
+            	amountStateTax = (sub_total*(outletInfo.stateTaxPercentage)).toFixed(2);
+              	stateTaxRender = '<tr class="shipping-cost"> <td><grey>SGST ('+Math.round(outletInfo.stateTaxPercentage*1000)/10+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountStateTax+' </grey></td> </tr>';              
+          }
+          
+          //Central Tax Info.
+          if(outletInfo.isCentralTaxCollected){
+            	amountCentralTax = (sub_total*(outletInfo.centralTaxPercentage)).toFixed(2);
+              	centralTaxRender = '<tr class="shipping-cost"> <td><grey>CGST ('+Math.round(outletInfo.centralTaxPercentage*1000)/10+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountCentralTax+' </grey></td> </tr>';              
+          }          
+          
+          //Container Charges
+          if(outletInfo.isParcelCollected){
+          	if(isTakeAway == 'true'){          
+          		amountContainer = (sub_total*(outletInfo.parcelPercentagePickup)).toFixed(2);
+              		containerChargesRender = '<tr class="shipping-cost"> <td><grey>Container Charges ('+Math.round(outletInfo.parcelPercentagePickup*100)+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountContainer+' </grey></td> </tr>';    
+              	}
+              	else{
+          		amountContainer = (sub_total*(outletInfo.parcelPercentageDelivery)).toFixed(2);
+              		containerChargesRender = '<tr class="shipping-cost"> <td><grey>Container Charges ('+Math.round(outletInfo.parcelPercentageDelivery*100)+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountContainer+' </grey></td> </tr>';                  	
+              	}          
+          }
+          
+        }
+        
+        //All the extra charges consolidated
+        extras = stateTaxRender + centralTaxRender + containerChargesRender;
+
+        //Calculate Grand Total:
+        var grand_total = 0;
+	grand_total = parseFloat(sub_total) + parseFloat(amountStateTax) + parseFloat(amountCentralTax) + parseFloat(amountContainer);
+	grand_total = Math.round(grand_total);
+
+        //Minimum order value
+        var min_value = 200;
+        if(localStorage.getItem("outletInfo") != null){
+          min_value = JSON.parse(localStorage.getItem("outletInfo")).minAmount;
+        }
+
+        var checkoutButton = '';
+        if(isTakeAway == 'true'){
+          checkoutButton = '<div onclick="goCheckout()" style="text-decoration: none"><button class="btn btn-success btn-block">Check Out</button></div>';
+        }
+        else{
+          if(grand_total >= min_value){
+            checkoutButton = '<div onclick="goCheckout()" style="text-decoration: none"><button class="btn btn-success btn-block">Check Out</button></div>';
+          }
+          else {
+            checkoutButton = '<div style="text-decoration: none"><button class="btn btn-success btn-block" disabled>Minimum Rs. '+min_value+' to Continue</button></div>';
+          }
+        }
+
+        //Overwrite if oulet closed
+        if(isOutletClosed =='true'){
+          takeawayBar = '';
+          checkoutButton = '<div style="text-decoration: none; padding: 0px 5px"><p style="padding: 5px; margin: 0px; color: #FFF; background:#c52031">The nearest outlet is now closed for online orders.</p></div>';
+        }
+
+
+        document.getElementById("mobileCartArea").innerHTML  = '<div style="max-height:220px; overflow-y:auto;" id="ScrollStyle"><table class="table table-condensed" style="margin-bottom: 0px; margin-top: -16px;"> <tbody></tbody> <colgroup> <col width="3%"> <col width="72%"> <col width="25%"> </colgroup> <tbody> '+row+' </tbody> </table></div><table class="table table-condensed" style="margin-bottom: -20px;"> <tbody> <tr> <td><grey>Cart Sub Total</grey></td> <td><grey><i class="fa fa-inr"></i> '+sub_total+'</grey></td> </tr> '+extras+' <tr> <td><red>Grand Total</red></td> <td><strong><red><span><i class="fa fa-inr"></i> '+grand_total+'</span></red></strong></td> </tr> </tbody> </table><hr>'+takeawayBar+checkoutButton;
+       
+        document.getElementById("mobileFullCartArea").innerHTML = "";
+
+    }
+    else{
+        document.getElementById("mobileCartArea").innerHTML =  '<center> <img src="assets/images/elements/emptycart.png" width="50%" style="max-width: 120px"> <p style="color: #c61f31">Your Cart is Empty.</p> </center>';   
+
+        if(isOutletClosed =='true'){
+          document.getElementById("mobileFullCartArea").innerHTML  = '<p style="color: #FFF; background: #c52031; padding: 5px; font-size: 14px;">The nearest outlet is now closed for online orders.</p>';
+        }
+
+    }
+    }
+    
+    
+    function openQuickCart(){
+        renderCart();
+    	$('#cartModal').modal('show');
+    }
+    
+    setTimeout(function(){ 
+    	renderCart();
+    }, 200);
+    
+    	  
+	  
+
+
+
+
+      //Get Cookie Info.
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }	  
+      
+  </script>
+  
+
+</head>
+
+<body onload="callSetLocation();"ng-app="Deals" ng-cloak style="background: #F7F7F7" ng-controller="DealsController">
+
+<div id="loading"></div>
+
+    <a class="sr-only" href="#content">Skip navigation</a>
+
+    <!-- Docs master nav -->
+
+    <header class="navbar navbar-fixed-top bs-docs-nav" role="banner">
+        <div class="container">
+            <div class="navbar-header" >
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <button class="navbar-toggle" type="button" onclick="changeCity()" ng-if="!isLocationSet">
+                  <i class="fa fa-map-marker"></i>
+                </button>
+                <button class="navbar-toggle" type="button" style="border: none" onclick="changeCity()" ng-if="isLocationSet">
+                  <i class="fa fa-map-marker"></i> {{(locationData.location).substring(0, 10)}} <tag ng-if="(locationData.location).length > 10">...</tag>
+                </button>
+                                
+                <a href="index.html" class="navbar-brand"><img src="assets/images/common/logo_small.png"></a>
+            </div>
+            
+            <div class="navbar-header theLocationBar" style="float:right; vertical-align: middle;">
+	              <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+	                <ul class="nav navbar-nav">
+	                    <li class="myCityA">
+	                    
+	                        <!-- <a href="" class="locationChangerClassic" data-toggle="modal" data-target="#setLocation"><i class="fa fa-map-marker"></i> {{locationData.location}}, {{locationData.city}}</a> ** The mobile view anyways taking care of this Modern/Classic view ** -->
+	                        <a href="" class="locationChangerModern" ng-if="isLocationSet" href="javascript:;" ng-click="toggleLocation();" ><i class="fa fa-map-marker"></i> {{locationData.location}}</a>
+	                        <a href="" ng-if="!isLocationSet" class="btn cityButton locationChangerModern" style="color: #EAEAEA" ng-click="toggleLocation();" >Set Your Location <span class="caret"></span></a>
+							<!-- Location search dropdown starts here -->
+		                			<div class="location-search-container nav-tip" style="width: 355px" id="myNewLocationWindow">
+	
+		                				<div class="modal-header" ng-click="closeLocation()" style="position: absolute; top:0; right: 0; z-index: 2; border: none">
+						                    <button type="button" class="close locationClose" aria-label="Close">x</button>
+						                </div>
+	
+	                  					
+								<div class="__dd-sec-top struktur" style="display: block" id="remoteNewLocation">
+									<p style="padding: 0; margin: -8px 0 0 0; font-size: 12px; font-weight: 400; color: #a09f9f; text-transform: uppercase; display: block; width: 100%;">Set Your Location</p>
+									<hr style="border-top: 1px solid #d8d8d8;">
+		                    					<input class="typeahead" google-place-suggestions location="location" style="background: none; width: 100%" type="text" id="locationInput" placeholder="Start typing your location here..." ng-model="googleLocation">
+		                  				</div>
+		                  				
+		                  				<div class="__dd-sec-bottom" ng-show="popularAreasList.length > 0">
+			                    				<div class="__dropdown-head">POPULAR AREAS</div>
+			                    				<div class="__top-cities">
+		                      					<tag class="popularLocation" ng-click="setLocationFromPopular(popular)" ng-repeat="popular in popularAreasList">{{popular.name}}</tag>
+		                  					</div>
+		                				</div>
+	              					</div>
+	              						                        
+	                        
+	                    </li>
+	                    
+	                    
+	                    <!--
+	                    <li ng-if="!isLocationSet">
+	                      <div class="dropdown" id="cityPopup" style="margin-top: 9px;">
+	                        <button class="btn cityButton" type="button">Set Your Location</button>
+	                      </div>
+	                    </li>
+	                    -->
+                   	                    
+	
+	                </ul>
+	              </nav>
+            </div>
+                        
+	                  				
+            <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+                <ul class="nav navbar-nav">
+		    <li class="myCityA">
+                        <a href="index.html">Order Now</a>
+                    </li>
+                    <li class="active">
+                        <a href="deals.html">Offers</a>
+                    </li>                         
+                    <li ng-if="isLoggedIn" class="myCityA">
+                        <a href="account.html">My Account</a>
+                    </li>
+                    <li ng-if="isLoggedIn" class="myCityA">
+                        <a href="#" onclick="getHelp()">Customer Support</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="#" ng-if="isLoggedIn" onclick="logoutNow()">Logout</a>
+                        <a href="/login" ng-if="!isLoggedIn">Login</a>
+                    </li>
+                    <li>
+                    	<a style="color: #FFF"><i class="fa fa-envelope-o"></i> care@zaitoon.online</a>
+                    </li>
+                    <!--<li ng-if="isLocationSet" class="myCityA secondLocation">
+                        <a href="" data-toggle="modal" data-target="#setLocation"><i class="fa fa-map-marker"></i> {{locationData.location}}, {{locationData.city}}</a>
+                    </li> -->
+                                    
+                </ul>
+            </nav>
+        </div>
+    </header>
+                 					              					                           					    
+
+    <!-- Docs page layout -->
+    <div class="bs-header" id="content">
+        <div class="container">
+            <img src="assets/images/elements/designer_logo.png" style="width:70%; max-width:435px">
+        </div>
+    </div>
+
+
+    <div class="container bs-docs-container specialDealsHolder" style="margin-top: 30px;">
+        <div class="row">
+        
+	        <div ng-repeat="deal in dealsList">
+	        
+	            <div class="col-md-3 myDeal" role="main" ng-if="deal.type == 'coupon'">
+		            	<h2 class="dealCouponHead">COUPON</h2>
+			        <img ng-if="deal.isImageAvailable" ng-src="{{deal.url}}" style="width: 100%; max-height: 360px">
+			        <img ng-if="!deal.isImageAvailable" src="https://www.accelerateengine.app/food-engine/apis/images/defaults/banner_default_red.jpg" style="width: 100%; max-height: 360px">
+		                <div class="dealWindow">                  	              	
+		                	<p class="dealCouponCode">{{deal.code}}</p> <br>              	
+		                	<p class="dealText">{{deal.description}}</p>
+		                	<p class="dealValidity" ng-if="deal.validTill != ''">Valid till {{deal.validTill}}</p>
+		                </div>                
+	            </div>
+	            
+	            <div class="col-md-3 myDeal" role="main" ng-if="deal.type == 'promotion'">            
+			        <img ng-if="deal.isImageAvailable" ng-src="{{deal.url}}" style="width: 100%; max-height: 360px">
+			        <img ng-if="!deal.isImageAvailable" src="https://www.accelerateengine.app/food-engine/apis/images/defaults/banner_default_red.jpg" style="width: 100%; max-height: 360px">
+		                <div class="dealWindow">                	
+		                	<p class="dealText">{{deal.description}}</p>
+		                	<p class="dealValidity" ng-if="deal.validTill != ''">Expires on {{deal.validTill}}</p>
+		                </div>	 
+		    </div>
+		</div>
+		<div ng-repeat="combo in combosList">    
+	            <div class="col-md-3 myDeal" role="main">
+	            	<div class="dealImage" style="position: relative;">
+		            	<h2 class="dealCombo blink_me">Combo Offer</h2>	            	
+			        <img ng-if="combo.isImageAvailable" ng-src="{{combo.url}}" style="width: 100%; max-height: 360px">
+		       	</div>		
+	                <div class="dealWindow" style="padding: 10px;">   
+	                	<price style="display: block; position: relative">
+	                		<p class="dealComboName">{{combo.itemName}}</p>
+	                		<amount class="comboPriceAmount"><i class="fa fa-inr" style="font-size: 70%; padding-right: 5px"></i>{{combo.itemPrice}}</amount>
+	                	</price>     
+	                	          	              	                	          	
+	                	<p class="dealText">{{combo.comboBrief}}</p>
+	                	
+	                	<button class="btn btn-sm zaitoonAdd comboAddButton" ng-if="combo.isAvailable" style="float: right; position: absolute; bottom: 0; width: 100%; margin-left: -10px; border-radius: 0; background: #27ae60; color: #FFF; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; cursor: pointer;" ng-attr-id="{{'dish_'+combo.itemCode}}" ng-click="addToCart(combo)"><span  ng-attr-id="{{'dish_name_'+combo.itemCode}}">Add to Cart</span></button>
+	                	
+	                	<button class="btn btn-sm zaitoonNoStock comboAddButton" ng-if="!combo.isAvailable" style="float: right; position: absolute; bottom: 0; width: 100%; margin-left: -10px; border-radius: 0; background: #dedede; color: #8c8585; text-transform: uppercase; letter-spacing: 1px; font-size: 12px; cursor: pointer; border: none;"><span  ng-attr-id="{{'dish_name_'+combo.itemCode}}">Out of Stock</span></button>
+	                </div>
+	            </div>  		    
+		               	
+	         </div>
+	                                                                
+         </div>
+         
+         
+         
+         
+	<div class="quickCart" onclick="openQuickCart()">
+	    <span><img src="assets/images/common/icon_cart.png" width="32px"><span class="cartBadge cartSize" id="quickCartCount">0</span></span>
+	</div>         
+    
+
+
+    <!-- Location Warning- Modal -->
+    <div id="warnLocation" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content" style="border-radius: 0px">
+          <div class="modal-body quickLocation" style="padding: 0">
+          
+							<!-- Location search dropdown starts here -->
+		                			<div class="location-search-container" style="display: block">
+	
+		                				<div class="modal-header" style="position: absolute; top:0; right: 0; z-index: 2; border: none">
+						                    <button type="button" class="close locationClose" data-dismiss="modal" aria-label="Close">x</button>
+						                </div>
+	
+	                  					
+								<div class="__dd-sec-top struktur" style="display: block" id="remoteNewLocation">
+									<p style="padding: 0; margin: -8px 0 0 0; font-size: 12px; font-weight: 400; color: #a09f9f; text-transform: uppercase; display: block; width: 100%;">Set Your Location</p>
+									<hr style="border-top: 1px solid #d8d8d8;">
+		                    					<input class="typeahead" google-place-suggestions location="location" style="background: none; width: 100%" type="text" id="locationInput" placeholder="Start typing your location here..." ng-model="googleLocation">
+		                  				</div>
+		                  				
+		                  				<div class="__dd-sec-bottom" ng-show="popularAreasList.length > 0">
+			                    				<div class="__dropdown-head">POPULAR AREAS</div>
+			                    				<div class="__top-cities">
+		                      					<tag class="popularLocation" ng-click="setLocationFromPopular(popular)" ng-repeat="popular in popularAreasList">{{popular.name}}</tag>
+		                  					</div>
+		                				</div>
+	              					</div>
+	              					
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+    
+    
+    
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="border-radius: 0px">
+                <div class="modal-header" style="position: absolute; top:0; right: 0; z-index: 2; border: none">
+                    <!----><button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-if="!isUnavoidable"><span aria-hidden="true">×</span></button><!---->
+                </div>
+          <div class="modal-body" style="text-align: left">
+          	<div id="mobileCartArea"><center><img src="assets/images/common/spinner.svg" style="width: 25%"></center></div>
+          	<div id="mobileFullCartArea"></div>          	
+          </div>
+        </div>
+
+      </div>
+    </div>    
+      
+    
+    <!-- Beyond Delivery - Modal -->
+    <div id="beyondDeliveryWarning" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style=" border-radius: 6px; overflow-y: auto;  border: none;">
+                <div class="modal-body" style="text-align: center;">
+		        <h3 style="color: #fb1772; font-size: 18px; font-weight: 300; text-transform: uppercase; letter-spacing: 4px;">You are Beyond our Delivery Limits</h3>
+		        <p style="font-size: 18px; font-weight: 300; color: #313131; margin: 30px 0 15px 0; padding: 0 25px;">Selected area is beyond our delivery limits. You can place <tag style="color: #c52031; font-weight: bold;">only Take Away</tag> orders.</p>       
+                </div>        
+                <div class="modal-footer" style="border: none; padding: 0">
+          		<span class="btn btn-danger" style="border-radius: 0; width: 100%; height: 40px;" ng-click="hideBeyondDeliveryWarning()">ACCEPT</span>
+                </div>
+         </div>
+       </div>
+    </div>      
+            
+
+    
+    <!-- Help - Modal -->
+    <div id="helpWindow" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style="0 5px 15px rgba(0,0,0,.5); border-radius: 0">
+                <div class="modal-header" style="border: none; padding: 0; background: linear-gradient(to right, #ff5a76 0%, #dc6348 100%);">
+                    <p style="color: #FFF;font-weight: 300;font-size: 21px;margin: 15px 0;text-align: center;">Zaitoon Customer Support</p>
+                    <button type="button" class="close ng-scope" style="outline: none;position: absolute;top: 17px;right: 20px; z-index: 2;color: #ffffff;opacity: 0.5;" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                
+                <div class="modal-body" style="text-align: center;">
+                    	<form style="padding: 10px 40px" id="mainHelpContent">			  
+			  <div class="form-group" style="margin-bottom: 5px">
+			    	<label class="helpLabel">Your Concern</label>
+			    	<div id="inline_query_type" style="margin-bottom: 5px">
+			    		<label class="help-container"><input type="radio" name="queryType" value="GENERAL" checked> <span class="help-checkmark"></span><span class="help-mylabel"> General Query/Suggestion</span></label>
+			    		
+			    		<label class="help-container"><input type="radio" name="queryType" value="REFUND"> <span class="help-checkmark"></span><span class="help-mylabel"> Refund Request</span></label>
+				</div>
+				  
+			    	<textarea class="form-control helpInput" placeholder="Write something here ..." style="resize: none; line-height: 1.8em" rows="5" id="helpComment"></textarea>
+			    	<p style="margin: 5px 0px 0px 0px; color: #ecf0f1; font-size: 12px; text-align: right" maxlength="500" id="helpCommentLimit"></p>			    	
+			  </div>
+			  <div class="form-group" id="refundPart">							    			    				    	
+			  </div>
+			  <div class="form-group">
+			  	<div class="col-sm-12" style="padding-left: 0; padding-right: 0">
+			  		<label class="helpLabel">Contact Details</label>
+			  	</div>			    				  
+			      	<div class="col-sm-4" style="padding-left: 0">
+				 	<input type="text" class="form-control helpInputText" id="helpName" placeholder="Your Name">
+				</div>
+				<div class="col-sm-4" style="padding-right: 0; padding-left: 0">
+				 	<input type="number" class="form-control helpInputText" id="helpMobile" placeholder="Registered Mobile">
+				</div>	
+			    	<div class="col-sm-4" style="padding-right: 0">
+				 	<input type="email" class="form-control helpInputText" id="helpEmail" placeholder="Registered Email">
+				</div>			    				    	
+			  </div>
+
+			  	<button type="submit" style="margin-top: 20px; min-width: 150px" class="btn btn-success" onclick="submitHelp()"><i class="fa fa-paper-plane"></i> Send</button>	
+			  	<p style="margin: 5px 0px 0px 0px; color: #c52031" id="helpError"></p>	  
+			</form>
+                    	
+
+                </div>
+                <div class="modal-footer" style="text-align: center;background: #923123;">
+                    <h4 style="color: #ffffff;"><strong>Need a quick help?</strong></h4>
+                    <h6 style="color: #d48275;line-height: 18px;font-size: 12px;font-weight: 400;padding: 0 20px;">If money was deducted from your account but the order was failed, don't worry - your money is safe with us. Payment failure happens mostly because of the network related issues. Please create a Refund Request and we will initiate the refund soon. We usually reply in less than 24 hours. If you have any queries to be addressed immediately, please reach out to  our outlet managers directly, rest assured!</h6>
+                    <a href="https://zaitoon.online/home/#reach" <button="" type="button" class="btn btn-warning" style="background-color: transparent;color: #ffbe07;bo;border-color: #ffbe07;"><i class="fa fa-phone"></i> Contact Outlet Manager</a>
+                </div>
+            </div>
+
+      </div>
+    </div>
+    
+    
+    
+    
+    
+    
+        </div>
+    </div>
+
+    <!-- JS and analytics only. -->
+    <!-- Bootstrap core JavaScript
+================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/holder.js"></script>
+    <script src="assets/js/application.js"></script>
+
+
+    <!-- For Verified Mobile Number -->
+    <script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    </script>
+        
+    
+    <!-- HELP LINE -->
+    <script>
+	$("#inline_query_type input[name='queryType']").click(function(){
+	    if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+	            document.getElementById("refundPart").innerHTML = "";
+	            document.getElementById("helpComment").value = "";
+	    }
+	    else{
+	    	    document.getElementById("helpComment").value = "The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razorpay Payment ID for your reference.";
+		    document.getElementById("refundPart").innerHTML = '<div class="col-sm-12" style="padding-right: 0; padding-left: 0; margin-bottom: 20px"> <input type="text" class="form-control helpReference" id="helpPaymentReference" placeholder="Payment Reference ID"> </div> <p style=" font-size: 12px; color: #a29871; margin-bottom: 20px">Please note that the Payment Reference ID starts with <b style=" color: #4796da;">pay_</b> and which is not same as your Bank\'s Transaction ID. You would have received this via Email from Razorpay. </p>';
+	    }
+	});
+    </script>
+    
+    <script type="text/javascript">
+        //Characters Left in the comments
+        document.addEventListener("DOMContentLoaded", function(event) {
+          document.getElementById('helpComment').onkeyup = function(){
+            document.getElementById('helpCommentLimit').innerHTML =   (500-(this.value.length))+ ' characters left.';
+          }
+        });
+    </script>
+  
+  
+  	<script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyBPNmSUWcsodpH-DNjap_egW0nW_MrIViw"></script>
+	<script src="assets/js/google-maps-custom.js"></script>
+
+  
+
+
+</body>
+
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Login - Zaitoon Online</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+		<!-- Favicons -->
+		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/icons/apple-touch-icon-144-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/icons/apple-touch-icon-114-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/icons/apple-touch-icon-72-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" href="assets/icons/apple-touch-icon-57-precomposed.png">
+		<link rel="shortcut icon" href="assets/icons/favicon.png">
+		
+		<!-- Loading Script -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<style>
+			#loading {
+	    			position: absolute; 
+	    			width: 100%; height: 100%; 
+	    			background: url('../assets/images/common/ripple.svg') no-repeat center center;
+	    			background-size: 80px 80px;
+	    			background-color: rgba(0, 0, 0, 0.4);	    			
+	    			z-index: 100;
+			}
+		</style>		
+		<script>
+			$(window).ready(function() {
+				$('#loading').hide();
+			});		
+		</script>
+		
+
+
+		<script>
+
+		//Check if the user is Logged In
+		if(getCookie("user")){
+			window.location = "../index.html"
+		}
+
+		function getCookie(cname) {
+	    var name = cname + "=";
+	    var ca = document.cookie.split(';');
+	    for(var i = 0; i < ca.length; i++) {
+	        var c = ca[i];
+	        while (c.charAt(0) == ' ') {
+	            c = c.substring(1);
+	        }
+	        if (c.indexOf(name) == 0) {
+	            return c.substring(name.length, c.length);
+	        }
+	    }
+	    return "";
+		}
+
+
+		function doLogin(){
+		console.log('Trying DO LOGIN');
+			var val = {};
+			val.mobile = Number(document.getElementById('mobileLogin').value);
+			$('#loading').show();
+			$.ajax({
+					type: 'POST',
+					url: 'https://www.accelerateengine.app/food-engine/apis/userlogin.php',
+					data: JSON.stringify(val),
+					contentType: "application/json",
+					dataType: 'json',
+					success: function(data) {
+					$('#loading').hide();
+						 if(data.status){
+							 document.getElementById("loginError").innerHTML = "";
+							 document.getElementById("loginButton").style.display = "none";
+							 document.getElementById("otpButton").style.display = "inherit";
+
+							 document.getElementById("mobileLogin").disabled = true;
+							 document.getElementById("otpRequest").innerHTML = '<input type="text" style="text-align: center" name="otp" id="loginOtp" placeholder="Enter OTP" />';		
+							 	//Additional Warnings
+							 	var warning = data.error;
+							 	var timeLeft = 60;
+							 	
+							 	if(warning != ""){
+							 		document.getElementById("otpError").innerHTML = warning;
+							 		timeLeft = data.timeleft;
+							 	}
+							 	else{
+							 		document.getElementById("otpError").innerHTML = "";
+							 		timeLeft = 60;
+							 	}
+							 		
+							 	var loopTimer = setInterval(function(){
+								  document.getElementById("resendOTP").innerHTML = '<tag style="color: #bdc3c7;">Resend OTP in '+timeLeft +' seconds</tag>';
+								  timeLeft--;
+								  if(timeLeft == 0){
+								  	clearInterval(loopTimer);
+								  	document.getElementById("otpError").innerHTML = "";
+								  	document.getElementById("resendOTP").innerHTML = '<a href="#" onclick="doLogin()" style="color: #e67e22; text-decoration: underline">Resend OTP</a>';
+								  }
+								}, 1000);
+	 
+
+						 }
+						 else{
+								document.getElementById("loginError").innerHTML = data.error;
+						 }
+					}
+			});
+		}
+
+		function doOtp(){
+      var val = {};
+      val.mobile = Number(document.getElementById('mobileLogin').value);
+      val.otp = Number(document.getElementById('loginOtp').value);
+      $('#loading').show();
+      $.ajax({
+          type: 'POST',
+          url: 'https://www.accelerateengine.app/food-engine/apis/validatelogin.php',
+          data: JSON.stringify(val),
+          contentType: "application/json",
+          dataType: 'json',
+          success: function(data) {
+          $('#loading').hide();
+             if(data.status){
+               document.getElementById("otpError").innerHTML = "";
+
+					 	 	 //Set cookie
+							 var d = new Date();
+							 d.setTime(d.getTime() + 604800000);
+							 var expires = "expires="+ d.toUTCString();
+							 document.cookie = "user" + "=" + JSON.stringify(data.response) + ";" + expires + ";path=/";
+
+               window.location = "../index.html";
+             }
+             else{
+                document.getElementById("otpError").innerHTML = data.error;
+             }
+          }
+      });
+    }
+
+		</script>
+
+
+	</head>
+	<body class="is-loading">
+		
+		<div id="loading"></div>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<section id="main" style="padding: 35px 44px 20px 44px">
+						<header>
+							<span class="avatar"><img src="images/avatar.jpg" alt="" /></span>
+							<h1>Login</h1>
+						</header>
+
+						<form style="margin: 0">
+							<div class="field">
+								<input type="text" name="mobile" maxlength="10" id="mobileLogin" style="text-align: center" placeholder="Registered Mobile Number" />
+							</div>
+							<div class="field" id="otpRequest"></div>
+							<ul class="actions" style="margin: 0">
+								<li>
+									<div class="button" id="loginButton" onclick="doLogin()">Proceed</div>
+									<div class="button" style="display: none" id="otpButton" onclick="doOtp()">Login</div>
+									<p id="loginError" style="padding-top: 5px; margin: 0;  color: #e74c3c; text-transform: none; letter-spacing: normal"></p>
+									<p id="otpError" style="padding-top: 5px; margin: 0;  color: #e74c3c; text-transform: none; letter-spacing: normal"></p>
+									<p id="resendOTP" style="padding-top: 5px; margin: 0; color: #e74c3c; text-transform: none; letter-spacing: normal"></p>
+								</li>
+							</ul>
+							<a href="signup.html" style="text-transform: none; letter-spacing: normal; border-bottom: 1px solid grey; margin-top: 15px;">Sign Up</a>
+						</form>
+
+						<!-- <form>
+							<div class="field">
+								<input type="text" name="name" id="name" placeholder="Name" />
+							</div>
+							<div class="field">
+								<input type="text" name="mobile" id="mobile" placeholder="Mobile Number" />
+							</div>
+							<div class="field">
+								<input type="email" name="email" id="email" placeholder="Email" />
+							</div>
+							<ul class="actions">
+								<li><div class="button">Sign Up</div></li>
+							</ul>
+						</form> -->
+
+					</section>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<ul class="copyright">
+							<li>Powered by Accelerate</li>
+						</ul>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<!--[if lte IE 8]><script src="assets/js/respond.min.js"></script><![endif]-->
+			<script src="../assets/js/jquery.js"></script>
+
+			<script>
+				if ('addEventListener' in window) {
+					window.addEventListener('load', function() { document.body.className = document.body.className.replace(/\bis-loading\b/, ''); });
+					document.body.className += (navigator.userAgent.match(/(MSIE|rv:11\.0)/) ? ' is-ie' : '');
+				}
+			</script>
+
+	</body>
+</html>

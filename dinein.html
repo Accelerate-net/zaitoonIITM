@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Zaitoon Online</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Documentation extras -->
+    <link href="assets/css/docs.css" rel="stylesheet">
+    <link href="assets/css/art.css" rel="stylesheet">
+    <link href="assets/css/radio.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="assets/css/custom.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+	  <script src="assets/js/html5shiv.js"></script>
+	  <script src="assets/js/respond.min.js"></script>
+	<![endif]-->
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/icons/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/icons/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/icons/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="assets/icons/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="assets/icons/favicon.png">
+
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-cookies.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-route.js"></script>
+    <script src="controllers/dinein.js"></script>
+    
+        	<!-- Loading Script -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<style>
+			#loading {
+	    			position: absolute; 
+	    			width: 100%; height: 100%; 
+	    			background: url('assets/images/common/ripple.svg') no-repeat center center;
+	    			background-size: 80px 80px;
+	    			background-color: rgba(0, 0, 0, 0.4);	    			
+	    			z-index: 100;
+			}
+		</style>		
+		<script>
+			$(window).ready(function() {
+				$('#loading').hide();
+                                $('#loadingPayment').modal('hide');
+			});		
+		</script>
+		
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script type="text/javascript">
+    
+    //One time clear - localstorage check (GST Changes)
+    if(!getMyCookie("gstcheckout")){       
+               //Set cookie
+               var d = new Date();
+               d.setTime(d.getTime() + 12960000000); //150 days
+               var expires = "expires="+ d.toUTCString();
+               document.cookie = "gstcheckout" + "=" + "GST_CHECKOUT_CACHE_CLEARED" + ";" + expires + ";path=/";
+               
+               window.location.reload(true);    
+    }
+    
+      //Get Cookie Info.
+      function getMyCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }	  
+    	   
+    	   
+    	   
+
+        function renderCart(){
+
+          //Outlet info available?
+          var isOutletSet = false;
+          //var outletInfo = [];
+          if(localStorage.getItem("outletInfo") != null){
+            isOutletSet = true;
+            var outletInfo = JSON.parse(localStorage.getItem("outletInfo"));
+          }
+          else{
+            isOutletSet = false;
+          }
+
+
+        var row = "";
+
+        if(!localStorage.getItem("itemsInfo")){
+          window.location = "index.html";
+        }
+
+        if (JSON.parse(localStorage.getItem("itemsInfo")).length != 0) // If the cart is not empty.
+        {
+
+        var info = JSON.parse(localStorage.getItem("itemsInfo"));
+        var sub_total = 0;
+        var i = 0;
+
+        while(i<info.length)   {
+
+            //Jugaad to hide border in the first row.
+            var noBorder = "";
+            if(i == 0){noBorder = 'style="border-top:none; padding-top: 20px;"'}
+
+             row = row +'<tr><td class="cartDescription" '+noBorder+'> <p style="font-size: 14px; color: #34495e">'+info[i].itemName+'</p>';
+             if(info[i].isCustom)
+             {
+                row = row + '<p style="font-size: 9px; color: grey; margin-top: -10px;">Choice: '+info[i].variant+'</p>';
+             }
+             row = row + '</td> <td class="cart_quantity" '+noBorder+'> <div class="cartButtons"> <span id="item_count_12"> x'+info[i].qty+' </span></div> </td> <td class="cart_price" '+noBorder+'> <p><i class="fa fa-inr"></i> <span id="item_price_12">'+info[i].itemPrice+'</span></p> </td> </tr>';
+
+             sub_total += (info[i].qty*info[i].itemPrice);
+             i++;
+        }
+
+
+
+        //TAX AND DELIVERY CHARGES
+        var extras = "";
+        
+        var stateTaxRender = "";
+        var centralTaxRender = "";
+        
+        var amountStateTax = 0;
+        var amountCentralTax = 0;
+        
+        
+          //State Tax Info.
+          if(outletInfo.isStateTaxCollected){
+            	amountStateTax = (sub_total*(outletInfo.stateTaxPercentage)).toFixed(2);
+              	stateTaxRender = '<tr class="shipping-cost"> <td><grey>SGST ('+Math.round(outletInfo.stateTaxPercentage*100)+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountStateTax+' </grey></td> </tr>';              
+          }
+          
+          //Central Tax Info.
+          if(outletInfo.isCentralTaxCollected){
+            	amountCentralTax = (sub_total*(outletInfo.centralTaxPercentage)).toFixed(2);
+              	centralTaxRender = '<tr class="shipping-cost"> <td><grey>CGST ('+Math.round(outletInfo.centralTaxPercentage*100)+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountCentralTax+' </grey></td> </tr>';              
+          }          
+
+        
+        //All the extra charges consolidated
+        extras = stateTaxRender + centralTaxRender;
+
+        //Calculate Grand Total:
+        var grand_total = 0;
+	grand_total = parseFloat(sub_total) + parseFloat(amountStateTax) + parseFloat(amountCentralTax);
+	grand_total = Math.round(grand_total);
+	
+
+        document.getElementById("cartArea").innerHTML  = '<div style="max-height:280px; overflow-y:auto;" id="ScrollStyle"><table class="table table-condensed" style="margin-bottom: 0px; margin-top: -16px;"> <tbody></tbody> <colgroup><col width="62%"> <col width="15%"> <col width="23%"> </colgroup> <tbody> '+row+' </tbody> </table></div><table class="table table-condensed" style="margin-bottom: -20px; font-weight: bold;"> <tbody> <tr> <td><grey>Cart Sub Total</grey></td> <td><grey><i class="fa fa-inr"></i> '+sub_total+'</grey></td> </tr>'+extras+'<tr> <td><red>Grand Total</red></td> <td><strong><red><span><i class="fa fa-inr"></i> <tag id="grandTotal">'+grand_total+'</tag></span></red></strong></td> </tr> </tbody> </table> <br>';
+        document.getElementById("fullCartArea").innerHTML = "";
+    }
+    else{
+        document.getElementById("cartArea").innerHTML = '<center> <img src="assets/images/elements/emptycart.png" width="50%"> <p style="color: #bdc3c7">Your Cart is Empty.</p> </center>';
+        document.getElementById("fullCartArea").innerHTML  = '<p style="color: #bdc3c7; padding-top: 5px; font-size: 11px;">Add items to the cart to place a fresh order. You can quickly <a class="label label-default greyLabel" href="account.html" style="font-size: 10px;">Repeat an Order</a> you made with Zaitoon before.</p>';
+    }
+    }
+
+
+    function logoutNow(){
+      if(getCookie("user")){
+        document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location = "login/";
+      }
+    }
+
+    
+    
+    
+         //HELP LINE STUFF
+         function getHelp(){
+	      $('#helpWindow').modal('show'); 
+	      var temp_user_info = "";
+	      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		     		      
+		      document.getElementById("helpName").value = temp_user_info.name;
+		      document.getElementById("helpEmail").value = temp_user_info.email;
+		      document.getElementById("helpMobile").value = temp_user_info.mobile;
+	      }
+	  }
+	  
+	  function submitHelp(){
+	  
+	  	document.getElementById("helpError").innerHTML = "";
+	  	
+	  	var data = {};
+	  	data.name = document.getElementById("helpName").value;
+	  	data.email = document.getElementById("helpEmail").value;
+	  	data.mobile = document.getElementById("helpMobile").value;
+	  	data.comment = document.getElementById("helpComment").value;
+	  	
+	  	if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+		       data.type = "GENERAL";
+		       data.reference = "";
+		}
+		else{
+		       data.type = "REFUND";
+		       data.reference = document.getElementById("helpPaymentReference").value;		
+		}
+		
+
+	  	
+		//Validations
+		if(!(/^[a-zA-Z\s]*$/.test(data.name))){
+			document.getElementById("helpError").innerHTML = "Names can contain only letters";
+		}
+		else if(!(/^\d{10}$/).test(data.mobile)){
+			document.getElementById("helpError").innerHTML = "Mobile Number has to be 10 digit number";
+		}
+		else if((data.comment).length < 10){
+			document.getElementById("helpError").innerHTML = "Please elaborate your query";
+		}
+		else if((data.comment).length > 500){
+			document.getElementById("helpError").innerHTML = "Comments can not contain more than 500 characters";
+		}
+		else if(data.comment == 'The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razoray Payment ID for your reference.' && data.type == 'REFUND'){
+			document.getElementById("helpError").innerHTML = "Please edit the date and time of placing the order, order amount etc. in comments";
+		}
+		else if(data.type == 'REFUND' && (data.reference).length < 1){
+			document.getElementById("helpError").innerHTML = "Add 'Payment Reference ID' from Razorpay";
+		}
+		else{ //Pass		      
+		      $('#loading').show();
+		      var temp_user_info = "";
+		      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		      	
+		      	data.token = temp_user_info.token;
+		      }
+		      $.ajax({
+		          type: 'POST',
+		          url: 'https://www.accelerateengine.app/food-engine/apis/submitquery.php',
+		          data: JSON.stringify(data),
+		          contentType: "application/json",
+		          dataType: 'json',
+		          success: function(data) {
+		             $('#loading').hide();
+		             if(data.status){
+		                document.getElementById("mainHelpContent").innerHTML = '<p style="font-size: 28px; font-weight: 200; color: #2ecc71; padding: 30px 60px; text-align: center">We have received your message. You will be contacted soon!</p>';
+		                setTimeout(function(){ $('#helpWindow').modal('hide');}, 4000);
+		             }
+		             else{
+		                document.getElementById("helpError").innerHTML = data.error;
+		             }
+		          }
+		      });
+      
+		}
+	  
+	  }
+	  
+
+
+
+
+      //Get Cookie Info.
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }	  
+      
+      
+
+        </script>
+
+    <link href="dist/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+
+<body onload="renderCart()" ng-app="DineIn" ng-cloak style="background: #F7F7F7">
+
+<div id="loading"></div>
+
+
+    <a class="sr-only" href="#content">Skip navigation</a>
+
+    <!-- Docs master nav -->
+
+    <header class="navbar navbar-fixed-top bs-docs-nav" role="banner">
+        <div class="container">
+            <div class="navbar-header" >
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <a href="index.html" class="navbar-brand"><img src="assets/images/common/logo_small.png"></a>
+            </div>
+            <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="index.html">Order Now</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="deals.html">Offers</a>
+                    </li>                         
+                    <li class="myCityA">
+                        <a href="account.html">My Account</a>
+                    </li>
+                    <li ng-if="1" class="myCityA">
+                        <a href="#" onclick="getHelp()">Help</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="#" onclick="logoutNow()">Logout</a>
+                    </li>
+                    <li ng-if="1">
+                    	<a style="color: #FFF"><i class="fa fa-envelope-o"></i> care@zaitoon.online</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Docs page layout -->
+    <div class="bs-header" id="content">
+        <div class="container">
+            <img src="assets/images/elements/designer_logo.png" style="width:70%; max-width:435px">
+        </div>
+    </div>
+
+
+
+    <div class="container bs-docs-container" ng-controller="DineInController">
+        <div class="row" ng-if="isLoggedIn">
+            <div class="col-md-7" role="main" style="background: #FFF; margin: 30px 0px">
+                <div class="bs-docs-section">
+
+                    <h2 class="zaitoonMenuHead" style="font-weight: 200; font-size: 28px; padding-top: 10px;">Beat the Queue - Self Billing</h2>
+                    <hr style="border-top: 2px solid #c52031; margin-top: 5px;">
+                    <div class="">
+
+                        <table class="table table-striped">
+                            <colgroup>
+                                <col width="2%">
+                                <col width="98%">
+                            </colgroup>
+                            <thead class="checkOutHeads">
+                                <tr>
+                                    <th style="border-bottom: none">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </th>
+                                    <th style="border-bottom: none">Dine In Options<tag style="float: right; cursor:pointer; font-weight: 400" data-toggle="modal" data-target="#billingTerms">*Conditions</tag></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: white;">
+                                    <td></td>
+                                    <td>
+                                      <div class="dropdown">
+                                        <b class="CheckOutSubHead">Dine In Location</b>
+                                        <p style="font-size: 16px; color: #34495e;">Quark Canteen, Opp. to Saraswathi Hostel, IIT Madras</p>
+
+                                      </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: none"></td>
+                                    <td style="border: none"><b class="CheckOutSubHead">Billing Time</b>
+                                    <div class="form-group">
+                                        <div class="row" style="margin: 10px 0">
+                                        	<div class="col-sm-4 timeSelection" ng-click="changeSlot(0)" ng-class="{timeSelectionGreen: slotTime == 0}">
+                                        		<p class="timeSelectionText">Immediately</p>
+                                        	</div>                                         	
+                                        	<div class="col-sm-4 timeSelection" ng-click="changeSlot(5)" ng-class="{timeSelectionGreen: slotTime == 5}">
+                                        		<p class="timeSelectionText">in 5 mins</p>
+                                        	</div>   
+                                        	<div class="col-sm-4 timeSelection" ng-click="changeSlot(10)" ng-class="{timeSelectionGreen: slotTime == 10}">
+                                        		<p class="timeSelectionText">in 10 mins</p>
+                                        	</div>                                        	
+                                        	<div class="col-sm-4 timeSelection" ng-click="changeSlot(15)" ng-class="{timeSelectionGreen: slotTime == 15}">
+                                        		<p class="timeSelectionText">in 15 mins</p>
+                                        	</div>                                          	
+                                        	<div class="col-sm-4 timeSelection" ng-click="changeSlot(20)" ng-class="{timeSelectionGreen: slotTime == 20}">
+                                        		<p class="timeSelectionText">in 20 mins</p>
+                                        	</div>  
+                                        	<div class="col-sm-4 timeSelection" ng-click="changeSlot(30)" ng-class="{timeSelectionGreen: slotTime == 30}">
+                                        		<p class="timeSelectionText">in 30 mins</p>
+                                        	</div>  
+                                        	                                        	                                      	                                     	                                	                                        	
+                            
+                                        </div>
+                                        <p style="font-weight: 400; color: #1abc9c; margin-top: 3px; width: 90%">This is scheduled billing time. Food will be ready in minimum of 10 mins* after billing. (*might vary during peak hours or depending on the items you are ordering)</p>
+                                    </div>
+                                    </td>
+                                </tr>
+                                <tr style="background: none">
+                                    <td style="border: none"></td>
+                                    <td style="border: none"><b class="CheckOutSubHead">Any notes to the Chef?</b>
+                                    <div class="form-group">
+                                        <textarea rows="3" id="chefNotes" maxlength="150" class="form-control ng-pristine ng-untouched ng-valid ng-empty ng-valid-maxlength checkOutText" style="border: 1px solid #ecf0f1" placeholder="More sugar, less spice? Your preferences go here." ng-model="orderStuff.comments"></textarea>
+                                        <p id="alertNotes" style="color: #bdc3c7; margin-top: 3px;"></p>
+                                    </div>
+                                    </td>
+                                </tr>                                
+
+                            </tbody>
+                        </table>
+                        <table class="table">
+                            <colgroup>
+                                <col width="2%">
+                                <col width="98%">
+                            </colgroup>
+                            <thead class="checkOutHeads">
+                                <tr>
+                                    <th style="border-bottom: none">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </th>
+                                    <th style="border-bottom: none">Payment Options</th>
+                                </tr>
+                            </thead>
+                            <tbody ng-if="isPrepaidAllowed">
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                            <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                              <label class="btn active" ng-click="setMode('PRE')">
+                                                <input type="radio" name='gender1' checked><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i> <span>  Online Payment</span>
+                                              </label>
+                                            </div>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody ng-if="!isPrepaidAllowed">
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <p style="color: #1abc9c; margin: 0; padding-top: 10px; font-weight: bold; font-size: 16px">Cash On Delivery (COD)</p>
+                                        <p style="color: #bdc3c7; font-size: 10px">Online Payment is currently unavailable.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+                <div class="" role="complementary" style="margin-bottom: 30px">
+                    <ul class="nav bs-sidenav myCartMain" style="border-radius: 0px">
+                    <h3 style="padding-left: 20px; color: #c52031">Your Cart</h3>
+                    <hr style="margin-bottom: 0px">
+                        <div id="cartArea" class="mycartArea">
+                        	<center><img src="assets/images/common/spinner.svg" style="width: 25%"></center>
+                        </div>  <!-- Closing cart area -->
+                    </ul>
+                    <div id="fullCartArea">
+                    </div>
+
+
+                    <button ng-if="!isPaymentPending" type="button" class="btn btn-success check_out" style="width: 100%; margin-top: 20px; border-radius: 0px; font-size: 16px;" ng-click="checkout(checkoutAddress, orderStuff, coupon)">Place Order</button>
+                    <button ng-if="isPaymentPending && !isCOD" type="button" class="btn btn-warning check_out" style="width: 100%; margin-top: 20px; border-radius: 0px; font-size: 16px;">Processing Payment</button>
+                    <p style="padding-top: 5px; text-decoration: underline; text-align: center" ng-if="isPaymentPending && !isCOD" ng-click="restartOrder()">Retry Payment</p>
+                    <button ng-if="isPaymentPending && isCOD" type="button" class="btn btn-warning check_out" style="width: 100%; margin-top: 20px; border-radius: 0px; font-size: 16px;">Processing Order</button>
+                    <p id="orderAlert" style="color: #c52031; padding: 10px 0px"></p>
+                </div>
+
+  
+     
+    
+
+<!-- Help - Modal -->
+    <div id="helpWindow" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style="0 5px 15px rgba(0,0,0,.5); border-radius: 0">
+                <div class="modal-header" style="position: absolute; top:0; right: 0; z-index: 2; border: none">
+                    <!----><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button><!---->
+                </div>
+                <div class="modal-body" style="text-align: center;">
+                    	<p style="color:#c52031; font-weight: 300; font-size: 18px">Zaitoon Online Customer Support</p>
+                    	<hr style="margin-top: 0; border-color: #c0392b">
+                    	<form style="padding: 10px 40px" id="mainHelpContent">			  
+			  <div class="form-group" style="margin-bottom: 5px">
+			    	<label class="helpLabel">Your Concern</label>
+			    	<div id="inline_query_type" style="margin-bottom: 5px">
+				    	<label class="radio-inline"><input type="radio" name="queryType" value="GENERAL" style="font-size: 16px; color: #34495e" checked="checked">General Query/Suggestion</label>
+					<label class="radio-inline"><input type="radio" name="queryType" value="REFUND" style="font-size: 16px; color: #34495e">Refund Request</label>
+				</div>
+				  
+			    	<textarea class="form-control helpInput" style="resize: none;" rows="5" id="helpComment"></textarea>
+			    	<p style="margin: 5px 0px 0px 0px; color: #ecf0f1; font-size: 12px; text-align: right" maxlength="500" id="helpCommentLimit"></p>			    	
+			  </div>
+			  <div class="form-group" id="refundPart">							    			    				    	
+			  </div>
+			  <div class="form-group">
+			  	<div class="col-sm-12" style="padding-left: 0; padding-right: 0">
+			  		<label class="helpLabel">Your Details</label>
+			  	</div>			    				  
+			      	<div class="col-sm-4" style="padding-left: 0">
+				 	<input type="text" class="form-control helpInputText" id="helpName" placeholder="Your Name">
+				</div>
+				<div class="col-sm-4" style="padding-right: 0; padding-left: 0">
+				 	<input type="number" class="form-control helpInputText" id="helpMobile" placeholder="Registered Mobile">
+				</div>	
+			    	<div class="col-sm-4" style="padding-right: 0">
+				 	<input type="email" class="form-control helpInputText" id="helpEmail" placeholder="Registered Email">
+				</div>			    				    	
+			  </div>
+
+			  	<button type="submit" style="margin-top: 20px; min-width: 150px" class="btn btn-success" onclick="submitHelp()">Send</button>	
+			  	<p style="margin: 5px 0px 0px 0px; color: #c52031" id="helpError"></p>	  
+			</form>
+                    	          
+                </div>
+                <div class="modal-footer" style="text-align: center; background: #FFFDF6">
+                    <h4 style="color: #95a5a6"><strong>Need a quick help?</strong></h4>
+                    <h6 style="color: #bdc3c7; line-height: 16px; font-size: 12px">For refund requests, the best suggested option is to drop a mail to us. We will revert in less than 24 hours. For any other immediate help, call our outlet managers, rest assured!</h6>
+                    <a href="https://zaitoon.online/home/#reach"<button type="button" class="btn btn-warning" style="background-color: transparent; color: #bdc3c7; border-color: #bdc3c7">Contact Outlet Manager</button></a>
+                </div>
+            </div>
+
+
+      </div>
+    </div>
+
+
+
+    <!-- Payment - Modal -->
+    <div id="loadingPayment" class="modal fade" role="dialog" style="width: 100%; background: none">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content" style="border-radius: 0px; padding: 0; background: none;">          
+          <div class="modal-body" style="width: 100%; background: #c0392b; padding: 20px">
+            <center><img src="assets/images/common/dots.svg" width="80px" id="loadingDot"></center>
+            <p style="color: #f39c12; font-weight: 200; font-size: 21px; text-align: center" id="paymentTimer"></p>
+            <p style="color: #FFF; font-weight: 200; font-size: 18px; text-align: center" id="paymentNote">Amount received. Placing order with Zaitoon.</p>
+            <p style="color: #DCDCDC; font-weight: 200; font-size: 14px; text-align: center" id="paymentWarn">Please wait. Do NOT Close or Refresh.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+    
+
+    <!-- Skip the Queue: Terms - Modal -->
+    <div id="billingTerms" class="modal fade" role="dialog" style="width: 100%; background: none">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">          
+          <div class="modal-body">
+            <h1 style="font-weight: 300; font-size: 32px">Beat the Queue</h1>
+            <p style="font-size: 14px; font-weight: 400">The Self Billing feature is enabled only for IIT Madras campus community. Skip the long queue at the billing counter by Billing yourself. Create the order from anywhere, schedule the approximate dine in time, and pay the amount online in advance. We will keep your food ready. Just show the OTP, you would receive via SMS when the order is confirmed, and take your food. It's that easy!<br><br>Please note that you can only set the billing time. Actual time at which food will be ready is approximately 10 mins after billing, and which may vary depending upon the items you have ordered or the rush at counters.<tag style="color: #c0392b"><br><br>Note: Order can't be cancelled, once it is confirmed.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>    
+
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- JS and analytics only. -->
+    <!-- Bootstrap core JavaScript
+================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+
+    <script src="assets/js/holder.js"></script>
+
+    <script src="assets/js/application.js"></script>
+
+    <script type="text/javascript">
+        //Characters Left in the comments
+        document.addEventListener("DOMContentLoaded", function(event) {
+          document.getElementById('chefNotes').onkeyup = function(){
+            document.getElementById('alertNotes').innerHTML =   (150-(this.value.length))+ ' characters left.';
+          }
+        });
+    </script>
+
+    <!-- HELP LINE -->
+    <script>
+	$("#inline_query_type input[name='queryType']").click(function(){
+	    if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+	            document.getElementById("refundPart").innerHTML = "";
+	            document.getElementById("helpComment").value = "";
+	    }
+	    else{
+	    	    document.getElementById("helpComment").value = "The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razoray Payment ID for your reference.";
+		    document.getElementById("refundPart").innerHTML = '<div class="col-sm-12" style="padding-right: 0; padding-left: 0; margin-bottom: 20px"> <input type="text" class="form-control helpReference" id="helpPaymentReference" placeholder="Payment Reference Number"> </div>';
+	    }
+	});
+    </script>
+    
+    <script type="text/javascript">
+        //Characters Left in the comments
+        document.addEventListener("DOMContentLoaded", function(event) {
+          document.getElementById('helpComment').onkeyup = function(){
+            document.getElementById('helpCommentLimit').innerHTML =   (500-(this.value.length))+ ' characters left.';
+          }
+        });
+    </script>
+
+
+</body>
+
+</html>

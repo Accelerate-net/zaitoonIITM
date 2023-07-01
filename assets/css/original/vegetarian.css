@@ -1,0 +1,17 @@
+@font-face {font-family: 'vegetarian';
+src:url('fonts/vegetarian.eot?53ylxw');
+src:url('fonts/vegetarian.eot?#iefix53ylxw') format('embedded-opentype'),
+url('fonts/vegetarian.woff?53ylxw') format('woff'),
+url('fonts/vegetarian.ttf?53ylxw') format('truetype'),
+url('http://static.sasongsmat.nu/fonts/vegetarian.svg?53ylxw#vegetarian') format('svg');
+font-weight: normal;font-style: normal;}
+[class^="veg-"], [class*=" veg-"] {
+font-family: 'vegetarian';speak: none;font-style: normal;font-weight: normal;font-variant: normal;text-transform: none;line-height: 1;
+-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
+[class^="nonveg-"], [class*=" nonveg-"] {
+font-family: 'vegetarian';speak: none;font-style: normal;font-weight: normal;font-variant: normal;text-transform: none;line-height: 1;
+-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
+.veg-indian-vegetarian:before {content: "\22a1";color:green;}
+.nonveg-indian-vegetarian:before {content: "\22a1";color:#c0392b;}
+.veg-vegetarian:before {content: "\24cb";color:green;}
+.vegetarianicon {font-family:"vegetarian";color:green;}

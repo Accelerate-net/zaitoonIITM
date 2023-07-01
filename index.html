@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-38503881-9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-38503881-9');
+</script>
+
+
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Zaitoon Online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+<meta name="description" content="Order food online from various outlets of Zaitoon Restaurants across Bangalore, Chennai, Madurai and Qatar. Get exciting offers and deals. Experience fastest food delivery service.">
+<meta name="Keywords" content="Restaurants in Bangalore, Order food online, Home delivery Bangalore, Restaurants in Chennai, Home delivery Chennai, Restaurants in Madurai, Home delivery Madurai, Zaitoon Online, Zaitoon Food Order, Zaitoon Restaurant, Arabian Restaurants in Bangalore, Arabian Restaurants in Chennai, Arabian Restaurants in Madurai, Multicuisine Restaurants Bangalore, Multicuisine Restaurants Chennai">
+
+<!-- OG Tags -->
+<meta property="og:title" content="Order food online from Zaitoon">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.zaitoon.online">
+<meta property="og:image" content="#">
+<meta property="og:description" content="Order food online from various outlets of Zaitoon Restaurants across Bangalore, Chennai, Madurai and Qatar. Get exciting offers and deals. Experience fastest food delivery service.">
+    
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="assets/css/zaitoon.min.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/icons/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/icons/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/icons/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="assets/icons/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="assets/icons/favicon.png">
+    
+    		<!-- Loading Script -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<style>
+			#loading {
+	    			position: absolute; 
+	    			width: 100%; height: 100%; 
+	    			background: url('assets/images/common/ripple.svg') no-repeat center center;
+	    			background-size: 80px 80px;
+	    			background-color: rgba(0, 0, 0, 0.4);	    			
+	    			z-index: 100;
+			}
+		</style>		
+		<script>
+			$(window).ready(function() {
+				$('#loading').hide();
+                                //$('#promoWindow').modal('show');  //Promo TEMPORARY
+
+			});		
+		</script>
+		
+	<style>
+html {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    width: 0px;  /* remove scrollbar space */
+    background: transparent;  /* optional: just make scrollbar invisible */
+}
+
+</style>	
+
+    <script>
+    
+    //To Skip Install App Banner
+    function clearInstallAppBanner(){ 
+               //Set cookie
+               var d = new Date();
+               d.setTime(d.getTime() + 604800000); //7 days
+               var expires = "expires="+ d.toUTCString();
+               document.cookie = "skipInstallBanner" + "=" + "SKIPPED_FOR_SEVEN_DAYS" + ";" + expires + ";path=/";
+               
+               renderAppInstallBanner();
+    }
+    
+    function renderAppInstallBanner(){
+    	if(getMyCookie("skipInstallBanner")){
+    		document.getElementById("installAppBannerHolder").style.display = "none";
+    		document.getElementById("webDownloadAppBannerHolder").style.display = "none";
+    	}else{
+    		document.getElementById("installAppBannerHolder").style.display = "block";
+    		document.getElementById("webDownloadAppBannerHolder").style.display = "block";
+    	}
+    }
+    
+    //One time clear - localstorage check (GST Changes)
+    if(localStorage.getItem("location") != "" && !getMyCookie("gstnewcache")){
+    	localStorage.removeItem("location");
+        localStorage.removeItem("isDeliveryAvailable");
+        localStorage.removeItem("isTakeAway");
+        localStorage.removeItem("outletInfo");
+        
+               //Set cookie
+               var d = new Date();
+               d.setTime(d.getTime() + 12960000000); //150 days
+               var expires = "expires="+ d.toUTCString();
+               document.cookie = "gstnewcache" + "=" + "GST_NEW_CACHE_CLEARED" + ";" + expires + ";path=/";
+               
+               window.location.reload(true);
+    
+    }
+    
+
+    //Outlet data refresh - fetch latest outlet info    
+    if(localStorage.getItem("location") != null && !getMyCookie("latestOutletFetch")){
+        
+          var temp = JSON.parse(localStorage.getItem('location')) || {};
+          var saved_coords = (temp.locationCode).split('_');
+
+          $.get("https://www.accelerateengine.app/food-engine/apis/googleoutletassigner.php?lat="+saved_coords[0]+"&lng="+saved_coords[1]+"&version=web", function(data, status){
+              var temp = JSON.parse(data);
+              if(temp.isServed){
+                localStorage.setItem("outletInfo", JSON.stringify(temp.response));
+                localStorage.setItem("isDeliveryAvailable", true);
+              }
+              else{
+              	localStorage.setItem("outletInfo", JSON.stringify(temp.response));
+                localStorage.setItem("isDeliveryAvailable", false);
+              }
+
+               //Set cookie
+               var d = new Date();
+               d.setTime(d.getTime() + 600000); //10 minutes 
+               var expires = "expires="+ d.toUTCString();
+               document.cookie = "latestOutletFetch" + "=" + "LATEST_OUTLET_INFO_FETCHED" + ";" + expires + ";path=/";
+               
+               window.location.reload(true);  
+                             
+          });                
+    }
+    
+    
+    
+    
+      //Get Cookie Info.
+      function getMyCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }	  
+    	       
+     
+
+    function openLogin(){
+      $('#loginWindow').modal('show');      
+    }
+             
+
+
+    // Check log in
+    function goCheckout(){
+      var temp_location = JSON.parse(localStorage.getItem("location"));
+      if (!temp_location) temp_location = [];
+
+      if(!temp_location.location){
+          //Ignore location warning if take away
+          $('#warnLocation').modal('show');
+      }
+      else if(getCookie("user")){
+        window.location = "checkout.html";
+      }
+      else{
+        $('#loginWindow').modal('show');
+      }
+    }
+    
+    window.inter = null;
+
+    function activateLogin() {
+      document.getElementById("otpRequest").innerHTML = "";
+      document.getElementById("resendOTP").innerHTML = "";
+      
+      clearInterval(inter);
+      inter = null;
+      
+      document.getElementById("loginButton").style.display = "inherit";
+      var value = document.getElementById('loginMobile').value;
+      if(value.toString().length == 10){
+          document.getElementById("loginButton").disabled = false;
+      }
+      else{
+          document.getElementById("loginButton").disabled = true;
+      }
+    }
+
+    function doLogin(){
+      var val = {};
+      val.mobile = Number(document.getElementById('loginMobile').value);
+      $('#loading').show();
+      $.ajax({
+          type: 'POST',
+          url: 'https://www.accelerateengine.app/food-engine/apis/userlogin.php',
+          data: JSON.stringify(val),
+          contentType: "application/json",
+          dataType: 'json',
+          success: function(data) {
+          $('#loading').hide();
+             if(data.status){
+               document.getElementById("loginError").innerHTML = "";
+               document.getElementById("loginButton").style.display = "none";
+               document.getElementById("otpRequest").innerHTML = '<div class="row"> <div class="col-sm-2"></div> <div class="col-sm-8"> <div style="width:100%" > <input class="typeahead" id="otpMobile" onkeyup="activateOtp()" style="width: 100%; font-size: 18px; font-weight: 300; text-align: center; height: 40px;" type="text" maxlength="4" placeholder="Enter the 4 digit OTP"> </div> </div> </div> <div class="row" style="padding-top: 20px"> <div class="col-sm-3"></div> <div class="col-sm-6"> <button class="btn btn-success" style="width: 100%;" id="otpButton" onclick="doOtp()" disabled>Log In</button> </div> </div> <div class="row" style="text-align: center"> <div class="col-sm-12"> <p id="otpError" style="padding: 2px 15px; color: #c52031"></p> </div> </div>';
+               
+               							//Additional Warnings
+							 	var warning = data.error;
+							 	var timeLeft = 60;
+							 	
+							 	if(warning != ""){
+							 		document.getElementById("otpError").innerHTML = warning;
+							 		timeLeft = data.timeleft;
+							 	}
+							 	else{
+							 		document.getElementById("otpError").innerHTML = "";
+							 		timeLeft = 60;
+							 	}
+							 		
+
+							 	inter = setInterval(function(){
+								  document.getElementById("resendOTP").innerHTML = '<tag style="color: #bdc3c7;">Resend OTP in '+timeLeft +' seconds</tag>';
+								  timeLeft--;
+								  if(timeLeft == 0){
+								  	clearInterval(inter);
+								  	document.getElementById("otpError").innerHTML = "";
+								  	document.getElementById("resendOTP").innerHTML = '<a href="#" onclick="doLogin()" style="color: #e67e22; text-decoration: underline">Resend OTP</a>';
+								  }
+								}, 1000);
+               
+             }
+             else{
+                document.getElementById("loginError").innerHTML = data.error;
+             }
+          }
+      });
+    }
+
+    function activateOtp() {
+      var value = document.getElementById('otpMobile').value;
+      if(value.toString().length == 4){
+          document.getElementById("otpButton").disabled = false;
+      }
+      else{
+          document.getElementById("otpButton").disabled = true;
+      }
+    }
+
+    function doOtp(){
+      var val = {};
+      val.mobile = Number(document.getElementById('loginMobile').value);
+      val.otp = Number(document.getElementById('otpMobile').value);
+      $('#loading').show();
+      $.ajax({
+          type: 'POST',
+          url: 'https://www.accelerateengine.app/food-engine/apis/validatelogin.php',
+          data: JSON.stringify(val),
+          contentType: "application/json",
+          dataType: 'json',
+          success: function(data) {
+          $('#loading').hide();
+             if(data.status){
+               document.getElementById("otpError").innerHTML = "";
+
+               //Set cookie
+               var d = new Date();
+               d.setTime(d.getTime() + 604800000);
+               var expires = "expires="+ d.toUTCString();
+               document.cookie = "user" + "=" + JSON.stringify(data.response) + ";" + expires + ";path=/";
+
+               window.location = "index.html";
+             }
+             else{
+                document.getElementById("otpError").innerHTML = data.error;
+             }
+          }
+      });
+    }
+
+    function addToCartNow(name, code, price, choice){
+
+      $('#customiseItem').modal('hide');
+      var item = {};
+      item.itemName = name;
+      item.itemCode = code;
+
+      if(localStorage.getItem("itemsInfo") === null){
+          var temp = [];
+          localStorage.setItem("itemsInfo", JSON.stringify(temp));
+      }
+      var info = JSON.parse(localStorage.getItem("itemsInfo")); //getting items from localStorage
+      var i = 0;
+      var flag = -1;
+
+      while(i<info.length)
+      {
+          //checks if item aldready in cart and returns the position of that object if exists
+          if(info[i].itemCode == code)
+          {
+              if(info[i].variant == choice){
+                flag = i;
+                break;
+              }
+          }
+          i++;
+      }
+
+      if(flag != -1){
+          var items = JSON.parse(localStorage.itemsInfo);
+          items[flag].qty +=1;
+          localStorage.setItem("itemsInfo", JSON.stringify(items));
+      }
+      else{
+          var oldItems = JSON.parse(localStorage.getItem('itemsInfo')) || [];
+          var newItem = item;
+          newItem.qty = 1;
+          newItem.isCustom = true;
+          newItem.variant = choice;
+          newItem.itemPrice = price;
+          oldItems.push(newItem);
+          var x = JSON.parse(localStorage.getItem("itemsInfo")) ;
+          localStorage.setItem('itemsInfo', JSON.stringify(oldItems));
+
+      }
+
+      renderCart();
+    }
+
+
+    function handleTick(cb) {
+      localStorage.setItem("isTakeAway", cb.checked);
+      renderCart();
+    }
+
+    function checkStatus(){      
+    
+      //Check the live status of outlet (only if location is set)
+      var cached_outlet = "HALROAD";
+      if(localStorage.getItem("outletInfo") != null){      
+      		
+      		var mytemp = JSON.parse(localStorage.getItem('outletInfo')) || [];
+      		cached_outlet = mytemp.outlet? mytemp.outlet: "HALROAD";
+      	     	
+	      	$.get("https://www.accelerateengine.app/food-engine/apis/getoutletstatus.php?outlet="+cached_outlet, function(data){
+	          var temp = JSON.parse(data);
+	          if(temp.status){
+	          	if(temp.isDelay){
+	          	    document.getElementById("outletCloseMsg").innerHTML = '<div class="bs-old-docs" style="background: #FFF; color: #f39c12"> <div class="container"> <p style="font-size: 18px; font-weight: 200; text-align: center"><i style="font-size: 120%" class="fa fa-clock-o"></i> '+temp.delayMessage+'</p> </div> </div>';
+	          	    localStorage.setItem("isOutletClosed", false);
+	          	    setTimeout(function(){ renderCart();}, 500);
+	          	}
+	          	else{
+		            document.getElementById("outletCloseMsg").innerHTML = "";
+		            localStorage.setItem("isOutletClosed", false);
+		            setTimeout(function(){ renderCart();}, 500);
+	          	}            
+	          }
+	          else{
+	            localStorage.setItem("isOutletClosed", true);
+	            document.getElementById("outletCloseMsg").innerHTML = '<div class="bs-old-docs" style="background: #FFF; color:#c52031"> <div class="container"> <p style="font-size: 18px; text-align: center"><i style="font-size: 120%" class="fa fa-frown-o"></i> '+temp.message+'</p> </div> </div>';
+	            setTimeout(function(){ renderCart();}, 500);
+	          }
+	      	});            
+      }
+      else{
+      	localStorage.setItem("isOutletClosed", false); //Hard coded stuff
+      	renderCart();
+      }
+
+    }
+
+    function renderCart(){              
+
+        //Is the outlet open?
+        var isOutletClosed = localStorage.getItem("isOutletClosed");        
+
+        //is it a take away?
+        var isTakeAway = false;
+        var takeawayBar = '';
+        if(localStorage.getItem("isTakeAway")){
+          isTakeAway = localStorage.getItem("isTakeAway");
+          if(isTakeAway == 'true'){
+            takeawayBar = '<div class="checkbox" style="color: #c52031; font-size: 16px;"> <label style="padding-left: 3px"> <input type="checkbox" value="" onclick="handleTick(this)" checked> <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span> Is it a Take Away? </label> </div>';
+          }
+          else{
+            takeawayBar = '<div class="checkbox" style="color: #c52031; font-size: 16px;"> <label style="padding-left: 3px"> <input type="checkbox" value="" onclick="handleTick(this)"> <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span> Is it a Take Away? </label> </div>';
+          }
+        }
+        else{
+          takeawayBar = '<div class="checkbox" style="color: #c52031; font-size: 16px;"> <label style="padding-left: 3px"> <input type="checkbox" value="" onclick="handleTick(this)"> <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span> Is it a Take Away? </label> </div>';
+        }
+
+        //Only take away possible if not deliverable area
+        if(localStorage.getItem("isDeliveryAvailable") == 'false'){
+          localStorage.setItem("isTakeAway", true);
+          takeawayBar = '<div class="checkbox" style="color: #c52031; font-size: 16px;"> <label style="padding-left: 3px"> <input type="checkbox" value="1" checked disabled> <span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span> Is it a Take Away? </label> </div><p style = "color:#e67e22; font-size=10px;">Order can not be delivered to your area. Take Away Only.</p>';
+        }
+
+
+        //Outlet info available?
+        var isOutletSet = false;
+        //var outletInfo = [];
+        if(localStorage.getItem("outletInfo") != null){
+          isOutletSet = true;
+          var outletInfo = JSON.parse(localStorage.getItem("outletInfo"));
+        }
+        else{
+          isOutletSet = false;
+        }
+
+
+        var row = "";
+        if (localStorage.getItem("itemsInfo") != null && JSON.parse(localStorage.getItem("itemsInfo")).length != 0) // If the cart is not empty.
+        {
+
+        var info = JSON.parse(localStorage.getItem("itemsInfo"));
+        var sub_total = 0;
+        var i = 0;
+
+        while(i<info.length)   {
+
+            //Jugaad to hide border in the first row.
+            var noBorder = "";
+            if(i == 0){noBorder = 'style="border-top:none; padding-top: 20px;"'}
+
+             row = row +'<tr><td class="crossIcon" '+noBorder+'> <div onclick="deleteFromCart('+info[i].itemCode+')"><i class="fa fa-times-circle"></i></div> </td> <td class="cartDescription" '+noBorder+'> <p style="font-size: 14px; color: #34495e">'+info[i].itemName+'</p>';
+             row = row + '<p style="font-size: 11px; color: grey; margin-top: -10px;"><i class="fa fa-inr"></i> '+info[i].itemPrice+'</p>';
+             if(info[i].isCustom)
+             {
+                row = row + '<p style="font-size: 9px; color: #1abc9c; margin-top: -10px;">Choice: '+info[i].variant+'</p>';
+             }
+             row = row + '</td> <td class="cart_quantity" '+noBorder+'> <div class="cartButtons"> <i class="fa fa-minus-circle zaitoonCartMenuMinus" aria-hidden="true" onclick="minusFunction('+info[i].itemCode+')"></i><span id="item_count_12"> '+info[i].qty+' </span><i class="fa fa-plus-circle zaitoonCartMenuPlus" aria-hidden="true" onclick="addFunction('+info[i].itemCode+')"></i> </div> </td> </tr>';
+             sub_total += (info[i].qty*info[i].itemPrice);
+             i++;
+        }
+        
+        if(i == 0){
+        	document.getElementById("mobileCheckoutButton").innerHTML = "Your Cart is Empty";
+        }
+        else if(i == 1){        
+        	document.getElementById("mobileCheckoutButton").innerHTML = "Only 1 item in Your Cart";
+        }
+        else{
+        	document.getElementById("mobileCheckoutButton").innerHTML = i+" items in Your Cart";
+        }
+        
+
+
+	//TAX AND DELIVERY CHARGES
+        var extras = "";
+        
+        var stateTaxRender = "";
+        var centralTaxRender = "";
+        var containerChargesRender = "";
+        
+        var amountStateTax = 0;
+        var amountCentralTax = 0;
+        var amountContainer = 0;        
+
+        if(!isOutletSet){
+          if(isTakeAway == 'true'){
+              amountContainer = (sub_total*.05).toFixed(2);
+              containerChargesRender = '<tr class="shipping-cost"> <td><grey>Delivery Charges (5%)</grey></td> <td><grey><i class="fa fa-inr"></i> '+amountContainer+'</grey></td> </tr>'
+          }
+          else {
+              amountContainer = (sub_total*.07).toFixed(2);
+              containerChargesRender = '<tr class="shipping-cost"> <td><grey>Delivery Charges (7%)</grey></td> <td><grey><i class="fa fa-inr"></i> '+amountContainer+'</grey></td> </tr>'
+          }
+        }
+        else{
+        
+          //State Tax Info.
+          if(outletInfo.isStateTaxCollected){
+            	amountStateTax = (sub_total*(outletInfo.stateTaxPercentage)).toFixed(2);
+              	stateTaxRender = '<tr class="shipping-cost"> <td><grey>SGST ('+Math.round(outletInfo.stateTaxPercentage*1000)/10+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountStateTax+' </grey></td> </tr>';              
+          }
+          
+          //Central Tax Info.
+          if(outletInfo.isCentralTaxCollected){
+            	amountCentralTax = (sub_total*(outletInfo.centralTaxPercentage)).toFixed(2);
+              	centralTaxRender = '<tr class="shipping-cost"> <td><grey>CGST ('+Math.round(outletInfo.centralTaxPercentage*1000)/10+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountCentralTax+' </grey></td> </tr>';              
+          }          
+          
+          //Container Charges
+          if(outletInfo.isParcelCollected){
+          	if(isTakeAway == 'true'){          
+          		amountContainer = (sub_total*(outletInfo.parcelPercentagePickup)).toFixed(2);
+              		containerChargesRender = '<tr class="shipping-cost"> <td><grey>Container Charges ('+Math.round(outletInfo.parcelPercentagePickup*100)+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountContainer+' </grey></td> </tr>';    
+              	}
+              	else{
+          		amountContainer = (sub_total*(outletInfo.parcelPercentageDelivery)).toFixed(2);
+              		containerChargesRender = '<tr class="shipping-cost"> <td><grey>Container Charges ('+Math.round(outletInfo.parcelPercentageDelivery*100)+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountContainer+' </grey></td> </tr>';                  	
+              	}          
+          }
+          
+        }
+        
+        //All the extra charges consolidated
+        extras = stateTaxRender + centralTaxRender + containerChargesRender;
+
+        //Calculate Grand Total:
+        var grand_total = 0;
+	grand_total = parseFloat(sub_total) + parseFloat(amountStateTax) + parseFloat(amountCentralTax) + parseFloat(amountContainer);
+	grand_total = Math.round(grand_total);
+
+        //Minimum order value
+        var min_value = 200;
+        if(localStorage.getItem("outletInfo") != null){
+          min_value = JSON.parse(localStorage.getItem("outletInfo")).minAmount;
+        }
+
+        var checkoutButton = '';
+        if(isTakeAway == 'true'){
+          checkoutButton = '<div onclick="goCheckout()" style="text-decoration: none"><button class="btn btn-success btn-block">Check Out</button></div>';
+        }
+        else{
+          if(grand_total >= min_value){
+            checkoutButton = '<div onclick="goCheckout()" style="text-decoration: none"><button class="btn btn-success btn-block">Check Out</button></div>';
+          }
+          else {
+            checkoutButton = '<div style="text-decoration: none"><button class="btn btn-success btn-block" disabled>Minimum Rs. '+min_value+' to Continue</button></div>';
+          }
+        }
+
+        //Overwrite if oulet closed
+        if(isOutletClosed =='true'){
+          takeawayBar = '';
+          checkoutButton = '<div style="text-decoration: none; padding: 0px 5px"><p style="padding: 5px; margin: 0px; color: #FFF; background:#c52031">The nearest outlet is now closed for online orders.</p></div>';
+        }
+
+
+        document.getElementById("cartArea").innerHTML = '<div style="max-height:220px; overflow-y:auto;" id="ScrollStyle"><table class="table table-condensed" style="margin-bottom: 0px; margin-top: -16px;"> <tbody></tbody> <colgroup> <col width="3%"> <col width="72%"> <col width="25%"> </colgroup> <tbody> '+row+' </tbody> </table></div><table class="table table-condensed" style="margin-bottom: -20px;"> <tbody> <tr> <td><grey>Cart Sub Total</grey></td> <td><grey><i class="fa fa-inr"></i> '+sub_total+'</grey></td> </tr> '+extras+' <tr> <td><red>Grand Total</red></td> <td><strong><red><span><i class="fa fa-inr"></i> '+grand_total+'</span></red></strong></td> </tr> </tbody> </table><hr>'+takeawayBar+checkoutButton;
+       
+        document.getElementById("fullCartArea").innerHTML = "";
+        
+        document.getElementById("mobileCartArea").innerHTML = document.getElementById("cartArea").innerHTML;
+        document.getElementById("mobileFullCartArea").innerHTML = document.getElementById("fullCartArea").innerHTML;
+    }
+    else{
+        document.getElementById("cartArea").innerHTML =  '<center> <img src="assets/images/elements/emptycart.png" width="50%" style="max-width: 120px"> <p style="color: #c61f31">Your Cart is Empty.</p> </center>';
+        document.getElementById("mobileCartArea").innerHTML = document.getElementById("cartArea").innerHTML;   
+        document.getElementById("mobileCheckoutButton").innerHTML = "Your Cart is Empty";
+        if(isOutletClosed =='true'){
+          document.getElementById("fullCartArea").innerHTML  = '<p style="color: #FFF; background: #c52031; padding: 5px; font-size: 14px;">The nearest outlet is now closed for online orders.</p>';
+          document.getElementById("mobileFullCartArea").innerHTML = document.getElementById("fullCartArea").innerHTML;
+        }
+
+    }
+    }
+    </script>
+
+    <script type="text/javascript">
+
+
+        function deleteFromCart(code) {
+            var info = JSON.parse(localStorage.getItem("itemsInfo"));
+            //var x = info[0].itemQuantity +1
+            var i = 0;
+            var flag = -1;
+            while(i<info.length)
+            {
+                //checks if item aldready in cart and returns the position of that object if exists
+                if(info[i].itemCode==code)
+                {
+                    flag = i;
+                    break;
+                }
+                i++;
+            }
+            var item = JSON.parse(localStorage.itemsInfo);
+            item.splice(flag, 1);
+            localStorage.setItem("itemsInfo", JSON.stringify(item));
+            renderCart();
+        }
+        function minusFunction(code) {
+            //document.getElementById("item_count_12").innerHTML  = "red";
+            var info = JSON.parse(localStorage.getItem("itemsInfo"));
+            //var x = info[0].itemQuantity +1
+            var i = 0;
+            var flag = -1;
+            while(i<info.length)
+            {
+                //checks if item aldready in cart and returns the position of that object if exists
+                if(info[i].itemCode==code)
+                {
+                    flag = i;
+                    break;
+                }
+                i++;
+            }
+            var item = JSON.parse(localStorage.itemsInfo);
+            if(item[flag].qty > 1){
+                item[flag].qty -=1;
+                localStorage.setItem("itemsInfo", JSON.stringify(item));
+            }
+            else{
+                item.splice(flag, 1);
+                localStorage.setItem("itemsInfo", JSON.stringify(item));
+            }
+            renderCart();
+        }
+        function addFunction(code) {
+            var info = JSON.parse(localStorage.getItem("itemsInfo"));
+            //var x = info[0].itemQuantity +1
+            var i = 0;
+            var flag = -1;
+            while(i<info.length)
+            {
+                //checks if item aldready in cart and returns the position of that object if exists
+                if(info[i].itemCode==code)
+                {
+                    flag = i;
+                    break;
+                }
+                i++;
+            }
+            var item = JSON.parse(localStorage.itemsInfo);
+            item[flag].qty +=1;
+            localStorage.setItem("itemsInfo", JSON.stringify(item));
+            renderCart();
+
+        }
+
+    </script>
+
+
+    <link href="dist/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Angular -->
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-cookies.min.js"></script>
+    <script src="controllers/menu.js?version=1.0.5"></script>
+
+    <!-- For passing data to modal -->
+    <script>
+    $(document).on("click", ".open-AddCustomItemDialog", function () {
+     var item = $(this).data('id');
+     var i = 0;
+     var list = "";
+     while(i < item.custom.length){
+       list = list + '<li onclick="addToCartNow(\''+item.itemName+'\', \''+item.itemCode+'\', \''+item.custom[i].customPrice+'\', \''+item.custom[i].customName+'\')"><a>'+item.custom[i].customName+' (Rs. '+item.custom[i].customPrice+')</a></li>';
+       i++;
+     }
+     document.getElementById("customOptionsTitle").innerHTML = "Your choice for "+item.itemName;
+     document.getElementById("customOptionsBody").innerHTML = list;
+    });
+    </script>
+
+    <!-- For city selection -->
+    <script>
+     
+      function logoutNow(){
+        if(getCookie("user")){
+          document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          window.location = "login/";
+        }
+      }
+
+
+      function callSetLocation(){
+        if(localStorage.getItem("location")){
+          var temp = JSON.parse(localStorage.getItem("location"));
+          if(temp.location == null || temp.location == "" || !temp.location){
+            $('#warnLocation').modal('show');
+          }
+        }
+      }
+      
+      
+      function changeCity(){
+        $('#warnLocation').modal('show');
+      }
+      
+      	 //HELP LINE STUFF
+         function getHelp(){
+	      $('#helpWindow').modal('show'); 
+	      var temp_user_info = "";
+	      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		     		      
+		      document.getElementById("helpName").value = temp_user_info.name;
+		      document.getElementById("helpEmail").value = temp_user_info.email;
+		      document.getElementById("helpMobile").value = temp_user_info.mobile;
+	      }
+	  }
+	  
+	  function submitHelp(){
+	  
+	  	document.getElementById("helpError").innerHTML = "";
+	  	
+	  	var data = {};
+	  	data.name = document.getElementById("helpName").value;
+	  	data.email = document.getElementById("helpEmail").value;
+	  	data.mobile = document.getElementById("helpMobile").value;
+	  	data.comment = document.getElementById("helpComment").value;
+	  	
+	  	if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+		       data.type = "GENERAL";
+		       data.reference = "";
+		}
+		else{
+		       data.type = "REFUND";
+		       data.reference = document.getElementById("helpPaymentReference").value;		
+		}
+		
+
+	  	
+		//Validations
+		if(!(/^[a-zA-Z\s]*$/.test(data.name))){
+			document.getElementById("helpError").innerHTML = "Names can contain only letters";
+		}
+		else if(!(/^\d{10}$/).test(data.mobile)){
+			document.getElementById("helpError").innerHTML = "Mobile Number has to be 10 digit number";
+		}
+		else if((data.comment).length < 10){
+			document.getElementById("helpError").innerHTML = "Please elaborate your query";
+		}
+		else if((data.comment).length > 500){
+			document.getElementById("helpError").innerHTML = "Comments can not contain more than 500 characters";
+		}
+		else if(data.comment == 'The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razorpay Payment ID for your reference.' && data.type == 'REFUND'){
+			document.getElementById("helpError").innerHTML = "Please edit the date and time of placing the order, order amount etc. in comments";
+		}
+		else if(data.type == 'REFUND' && (data.reference).length < 1){
+			document.getElementById("helpError").innerHTML = "Add 'Payment Reference ID' from Razorpay";
+		}
+		else{ //Pass		      
+		      $('#loading').show();
+		      var temp_user_info = "";
+		      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		      	
+		      	data.token = temp_user_info.token;
+		      }
+		      $.ajax({
+		          type: 'POST',
+		          url: 'https://www.accelerateengine.app/food-engine/apis/submitquery.php',
+		          data: JSON.stringify(data),
+		          contentType: "application/json",
+		          dataType: 'json',
+		          success: function(data) {
+		             $('#loading').hide();
+		             if(data.status){
+		                document.getElementById("mainHelpContent").innerHTML = '<p style="font-size: 21px;font-weight: 200;color: #74d29c;padding: 80px 30px;text-align: center;">We have received your message.<br>Your concern will be addressed soon!</p>';
+		                setTimeout(function(){ $('#helpWindow').modal('hide');}, 4000);
+		             }
+		             else{
+		                document.getElementById("helpError").innerHTML = data.error;
+		             }
+		          }
+		      });
+      
+		}
+	  
+	  }
+	  
+
+
+
+
+      //Get Cookie Info.
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }	  
+      
+      
+
+    </script>
+
+</head>
+
+<body onload="checkStatus(); callSetLocation(); renderAppInstallBanner();" ng-app="FullMenu" ng-controller="MenuController" data-spy="scroll" data-target=".bs-sidebar" ng-cloak style="background: #F7F7F7">
+
+
+    <!-- Download App -->
+    <div id="installAppBannerHolder" style="display: none">
+	    <div class="installAppBanner" style="width: 100%; background: #FFF; z-index: 20001; padding: 30px; position: fixed; top: 0; height: 100vh; display: none">
+	    	
+	    	<center><img src="assets/icons/favicon.png" style="width:35%; max-width: 200px;"></center>
+	    	
+	    	<h1 class="downloadAppText">Download the App</h1>
+	    	<center><img src="assets/images/elements/star_rating.png" width="40%" style="margin-bottom: 40px;"></center>
+	    	
+	    	<div class="row">
+	    		<div class="col-sm-6" style="padding: 10px 0;">
+	    			<center>
+	    			<a href="https://play.google.com/store/apps/details?id=com.accelerate.zaitoon"><img style="max-width: 180px; width: 100%" src="assets/images/elements/app_download_android.png"></a>
+	    			</center>
+	    		</div>
+	    		<div class="col-sm-6" style="padding: 10px 0;">
+	    			<center>
+	    			<a href="https://itunes.apple.com/ke/app/zaitoon/id1253240593"><img style="max-width: 180px; width: 100%" src="assets/images/elements/app_download_ios.png"></a>
+	    			</center>
+	    		</div>
+	    	</div>
+	    	
+	    	<p class="downloadAppTagline">get surprise offers on the app!</p>
+	    	<tag onclick="clearInstallAppBanner()" style="height: 40px; color: #c7c7c7; text-align: center; display: inherit; font-weight: 300; font-size: 15px; width: 100%; letter-spacing: 1px;">Grr Skip! I hate free Perks.</tag>
+	    </div>
+    </div>	    
+
+
+
+
+<!-- Google Tag Manager (noscript) 
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P5K6BB4"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+ End Google Tag Manager (noscript) -->
+
+    <a class="sr-only" href="#content">Skip navigation</a>
+
+    <!-- Docs master nav -->
+<div id="loading"></div>	
+
+
+    <header class="navbar navbar-fixed-top bs-docs-nav" role="banner" >
+        <div class="container">
+            <div class="navbar-header" >
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <button class="navbar-toggle" type="button" onclick="changeCity()" ng-if="!isLocationSet">
+                  <i class="fa fa-map-marker"></i>
+                </button>
+                <button class="navbar-toggle" type="button" style="border: none" onclick="changeCity()" ng-if="isLocationSet">
+                  <i class="fa fa-map-marker"></i> {{(locationData.location).substring(0, 10)}} <tag ng-if="(locationData.location).length > 10">...</tag>
+                </button>
+                <a href="index.html" class="navbar-brand"><img src="assets/images/common/logo_small.png"></a>
+            </div>
+            <div class="navbar-header theLocationBar" style="float:right; vertical-align: middle;">
+	              <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+	                <ul class="nav navbar-nav">
+			  <li class="myCityA">
+	                        <!-- <a href="" class="locationChangerClassic" data-toggle="modal" data-target="#setLocation"><i class="fa fa-map-marker"></i> {{locationData.location}}, {{locationData.city}}</a> ** The mobile view anyways taking care of this Modern/Classic view ** -->
+	                        <a href="" class="locationChangerModern" ng-if="isLocationSet" href="javascript:;" ng-click="toggleLocation();" ><i class="fa fa-map-marker"></i> {{locationData.location}}</a>
+	                        <a href="" ng-if="!isLocationSet" class="btn cityButton locationChangerModern" style="color: #EAEAEA" ng-click="toggleLocation();" >Set Your Location <span class="caret"></span></a>
+							<!-- Location search dropdown starts here -->
+		                			<div class="location-search-container nav-tip" style="width: 355px" id="myNewLocationWindow">
+	
+		                				<div class="modal-header" ng-click="closeLocation()" style="position: absolute; top:0; right: 0; z-index: 2; border: none">
+						                    <button type="button" class="close locationClose" aria-label="Close">x</button>
+						                </div>
+	
+	                  					
+								<div class="__dd-sec-top struktur" style="display: block" id="remoteNewLocation">
+									<p style="padding: 0; margin: -8px 0 0 0; font-size: 12px; font-weight: 400; color: #a09f9f; text-transform: uppercase; display: block; width: 100%;">Set Your Location</p>
+									<hr style="border-top: 1px solid #d8d8d8;">
+		                    					<input class="typeahead" google-place-suggestions location="location" style="background: none; width: 100%" type="text" id="locationInput" placeholder="Start typing your location here..." ng-model="googleLocation">
+		                  				</div>
+		                  				
+		                  				<div class="__dd-sec-bottom" ng-show="popularAreasList.length > 0">
+			                    				<div class="__dropdown-head">POPULAR AREAS</div>
+			                    				<div class="__top-cities">
+		                      					<tag class="popularLocation" ng-click="setLocationFromPopular(popular)" ng-repeat="popular in popularAreasList">{{popular.name}}</tag>
+		                  					</div>
+		                				</div>
+	              					</div>
+	              						                        
+	                        
+	                    </li>
+	                    
+	                    
+	                    
+	
+	                </ul>
+	              </nav>
+            </div>
+
+            <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="index.html">Order Now</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="deals.html">Offers</a>
+                    </li>                         
+                    <li ng-if="isLoggedIn" class="myCityA">
+                        <a href="account.html">My Account</a>
+                    </li>
+                    <li ng-if="isLoggedIn" class="myCityA">
+                        <a href="#" onclick="getHelp()">Customer Support</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="#" ng-if="isLoggedIn" onclick="logoutNow()">Logout</a>
+                        <a href="#" ng-if="!isLoggedIn" onclick="openLogin()">Login</a>
+                    </li>
+                    <li>
+                    	<a style="color: #FFF"><i class="fa fa-envelope-o"></i> care@zaitoon.online</a>
+                    </li>
+                    <!--<li ng-if="isLocationSet" class="myCityA secondLocation">
+                        <a href="" data-toggle="modal" data-target="#setLocation"><i class="fa fa-map-marker"></i> {{locationData.location}}, {{locationData.city}}</a>
+                    </li> -->
+                </ul>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Docs page layout -->
+    <div class="bs-header" id="content">
+        <div class="container">
+            <img src="assets/images/elements/designer_logo.png" style="width:70%; max-width:435px">
+            <a data-toggle="modal" href="#promoWindow"><img src="assets/promos/ad_small.png" id="promoSmall" style="width:100%; max-width:322px; float: right; position: absolute; bottom: 0; right: 0; margin-bottom: -40px;"></a>            
+        </div>
+    </div>
+
+
+    <!-- Oulet Closed Warning -->
+    <div id="outletCloseMsg" class="blink_me"></div>
+
+
+
+
+<!-- RENDER ANIMATION -->
+<div ng-if="!isRenderLoaded && !renderFailed"> 
+    <div class="container bs-docs-container" style="padding: 0px;">
+        <div class="row" style="margin-bottom: 50px">
+
+            <div class="col-md-3 myQuickMenu" >
+
+                <div class="bs-sidebar hidden-print affix-top" role="complementary">
+                    <ul class="nav bs-sidenav" style="border-radius: 0px; background: #FFF; text-shadow: none;" >
+                    <h3 class="quickMenuHead" style="color: #f1f1f1; font-weight: 200;">Quick Menu</h3>
+                    <hr style="border-color: #f1f1f1"></hr>
+                        <li>
+                            <div class="loaderDummyTile" style="height: 24px; margin: 5px 12px"></div>
+                            <div class="loaderDummyTile" style="height: 24px; margin: 5px 12px"></div>
+                            <div class="loaderDummyTile" style="height: 24px; margin: 5px 12px"></div>
+                            <div class="loaderDummyTile" style="height: 24px; margin: 5px 12px"></div>
+                            <div class="loaderDummyTile" style="height: 24px; margin: 5px 12px"></div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+            <div class="col-md-6" role="main"  style="margin-top: 30px; background: #FFF; padding: 0; ">
+
+<h3 class="quickMenuHead animatationSpecialMainHead" style="color: #f1f1f1; font-weight: 200; padding-top: 10px">ARABIAN DISHES</h3>
+
+          <div class="row" style="padding: 5px 20px 0 20px;"> <div class="infoTile" style="width: 30%;padding: 0 10px;display: inline-block;"> <div class="infoTileHead" style="width: 100%; height: 100px; display: inline-block;"> <div class="loaderDummyTile" style="height: 100px"></div> </div> <div class="infoTileHead" style="width: 100%; height: 18px; display: inline-block;"> <div class="loaderDummyTile" style="height: 18px"></div> </div> </div> <!-- Divide --> <div class="infoTile" style="width: 30%;padding: 0 10px;display: inline-block;"> <div class="infoTileHead" style="width: 100%; height: 100px; display: inline-block;"> <div class="loaderDummyTile" style="height: 100px"></div> </div> <div class="infoTileHead" style="width: 100%; height: 18px; display: inline-block;"> <div class="loaderDummyTile" style="height: 18px"></div> </div> </div> <!-- Divide -->  <div class="infoTile" style="width: 30%;padding: 0 10px;display: inline-block;"> <div class="infoTileHead" style="width: 100%; height: 100px; display: inline-block;"> <div class="loaderDummyTile" style="height: 100px"></div> </div> <div class="infoTileHead" style="width: 100%; height: 18px; display: inline-block;"> <div class="loaderDummyTile" style="height: 18px"></div> </div> </div> </div>
+
+		
+                <div class="bs-docs-section" style="padding: 5px 15px;">
+
+                <div class="menuArea">
+
+
+<!-- Sub 1 -->
+<div class="row" style="padding: 0; margin-top: 10px;"> <div class="infoTile animatationSpecialTitle" style="width: 100%; padding: 0 0 0 15px;"> <div class="infoTileHead" style="width: 50%; height: 32px; display: inline-block;"> <div class="loaderDummyTile" style="height: 32px"></div> </div> </div> </div>
+
+                    
+<table class="table table zaitoonMenuTable"> <col width="60%"> <col width="20%"> <col width="20%"> <tbody> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none"> <strong class="zaitoonItemPrice"><div class="loaderDummyTile" style="height: 18px"></div></strong> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"><i class="fa fa-plus"></i></tag> </td> </tr> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none"> <strong class="zaitoonItemPrice"><div class="loaderDummyTile" style="height: 18px"></div></strong> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"><i class="fa fa-plus"></i></tag> </td> </tr> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none"> <strong class="zaitoonItemPrice"><div class="loaderDummyTile" style="height: 18px"></div></strong> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"><i class="fa fa-plus"></i></tag> </td> </tr> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none"> <strong class="zaitoonItemPrice"><div class="loaderDummyTile" style="height: 18px"></div></strong> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"><i class="fa fa-plus"></i></tag> </td> </tr> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none"> <strong class="zaitoonItemPrice"><div class="loaderDummyTile" style="height: 18px"></div></strong> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"><i class="fa fa-plus"></i></tag> </td> </tr> </tbody> </table> 
+
+<!-- Sub 2 -->
+<div class="row" style="padding: 0; margin-top: 10px;"> <div class="infoTile animatationSpecialTitle" style="width: 100%; padding: 0 0 0 15px;"> <div class="infoTileHead" style="width: 50%; height: 32px; display: inline-block;"> <div class="loaderDummyTile" style="height: 32px"></div> </div> </div> </div>
+
+                    
+<table class="table table zaitoonMenuTable"> <col width="60%"> <col width="20%"> <col width="20%"> <tbody> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none"> <strong class="zaitoonItemPrice"><div class="loaderDummyTile" style="height: 18px"></div></strong> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"><i class="fa fa-plus"></i></tag> </td> </tr> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none"> <strong class="zaitoonItemPrice"><div class="loaderDummyTile" style="height: 18px"></div></strong> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"><i class="fa fa-plus"></i></tag> </td> </tr> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none"> <strong class="zaitoonItemPrice"><div class="loaderDummyTile" style="height: 18px"></div></strong> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"><i class="fa fa-plus"></i></tag> </td> </tr> </tbody> </table> 
+
+                </div> <!-- Menu Area -->                
+                </div>
+            </div>
+
+            <div class="col-md-3 mobileCart">
+                <div class="bs-sidebar hidden-print affix-top" role="complementary">
+                    <ul class="nav bs-sidenav" style="border-radius: 0px; background: #FFF; text-shadow: none;" >
+                    <h3 class="quickMenuHead" style="color: #f1f1f1; font-weight: 200;">Your Cart</h3>
+                    <hr style="border-color: #f1f1f1"></hr>
+<table class="table table zaitoonMenuTable" style="margin: 0 0 0 10px;"> <col width="80%"> <col width="20%"> <tbody> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"> </tag> </td> </tr> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"></tag> </td> </tr> <tr> <td style="vertical-align: middle; border: none; padding-left: 0"> <tag class="zaitoonItemName"><div class="loaderDummyTile" style="height: 18px"></div></tag> </td> <td style="vertical-align: middle; ; border: none; padding-right: 0"> <tag style="float: left; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #FFF; border: none; background: #f1f1f1; text-align: center; height: 18px; width: 18px; border-radius: 50%; padding: 2px;"></tag> </td> </tr> </tbody> </table> 
+                    </ul>
+                </div>
+            </div>
+      
+        </div>      
+    </div>
+   
+</div> 
+<!-- end of animation -->    
+    
+
+      <!-- Render Failed -->
+      <div ng-if="renderFailed" style="color: #bdc3c7; margin: 25px; font-size: 21px; font-weight: 300;">
+        <center>
+          <img src="assets/images/common/error_icon.png">
+          <p style="color: #bdc3c7; margin: 20px; font-size: 21px; font-weight: 300;">The Menu was failed to load. Please try again.</p>
+        </center>
+      </div>
+
+
+<!-- Loading completed -->
+<div ng-class="{'doNotShow': !isRenderLoaded || renderFailed}">
+
+    <div class="container bs-docs-container" style="padding: 0px;">
+        <div class="row" style="margin-bottom: 50px">
+
+            <div class="col-md-3 myQuickMenu" >
+
+                <div class="bs-sidebar hidden-print affix-top" role="complementary">
+                    <ul class="nav bs-sidenav" style="border-radius: 0px; background: #c52031; text-shadow: none;" >
+                    <h3 class="quickMenuHead" style="color: #FFF; font-weight: 200;">Quick Menu</h3>
+                    <hr></hr>
+                        <li ng-repeat="item in menu track by $index">
+                            <a href="#{{item.mainType}}" class="quickMenuName">{{item.mainName}}</a>
+                            <ul class="nav">
+                                <li ng-repeat="sub in item.subCategories track by $index" class="">
+                                    <a href="#{{item.mainType}}-{{sub.subType}}" class="quickMenuName">{{sub.subName}}</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                </div>
+                <!--
+               	<div style="color: #bdc3c7" class="homeTerms">
+                	<a href="../home/terms.html" style="font-size: 11px; color: #bdc3c7">Terms and Conditions</a> |
+			<a href="../home/privacy.html" style="font-size: 11px; color: #bdc3c7">Privacy Policy</a>
+		</div>
+		-->
+            </div>
+            <div class="col-md-6" role="main"  style="margin-top: 30px; background: #FFF; padding: 0; ">
+
+		<!-- Floating Title -->
+		<div class="floatingHead hidden-print affix-top"><tag class="floatingTitle"></tag> <input class="menuSearch" ng-model="searchKeyword" placeholder="Search"></div>
+
+                <div class="bs-docs-section" style="padding: 5px 15px;" ng-repeat="item in menu | filter: searchKeyword track by $index">
+
+                <div class="menuArea">
+                    	<h4 id="{{item.mainType}}" class="zaitoonMenuHead" >{{ item.mainName }}</h4>
+                    	<hr style="border-top: 2px solid #c52031; margin-top: 5px;">
+                                    
+                    
+		<!-- Featured Items -->
+		<div class="row row-horizon" style="padding: 0px 15px">
+		  <div class="col-xs-5 featuredItem" ng-repeat="fItem in getFeatureList(item.mainType) track by $index">
+			<div class="featureImage">
+		            	<h2 class="featurePrice"><i class="fa fa-inr" style="font-size: 70%; padding-right: 5px"></i>{{fItem.itemPrice}}</h2>	            	
+			        <img ng-src="{{fItem.photo}}" ng-class="{featuredAvailableImage: fItem.isAvailable, featuredNotAvailableImage: !fItem.isAvailable}">
+		       	</div>		
+	                <div class="featureContent">              	              	                	          	
+	                	<p class="featureName">{{fItem.itemName}}</p>
+	                	<div class="btn btn-sm zaitoonAdd featureButton" ng-if="fItem.isAvailable && !fItem.isCustom" ng-attr-id="{{'dish_'+fItem.itemCode}}" ng-click="addToCart(fItem)"><span  ng-attr-id="{{'dish_name_'+fItem.itemCode}}">Add to Cart</span></div>
+	                	<button class="btn btn-sm zaitoonAdd featureButton open-AddCustomItemDialog" ng-if="fItem.isAvailable && fItem.isCustom" data-id="{{fItem}}" data-toggle="modal" data-target="#customiseItem" style="float: right">Add to Cart</button>
+	                	<div class="btn-sm zaitoonNoStock featureButton" ng-if="!fItem.isAvailable">Out of Stock</div>
+	                </div>                
+		  </div>	  		  
+		</div>	
+		                    
+
+                    <div class="" ng-repeat="sub in item.subCategories | filter: searchKeyword track by $index">
+                        <table class="table table-hover zaitoonMenuTable" id="{{item.mainType}}-{{sub.subType}}">
+                            <col width="60%">
+                            <col width="20%">
+                            <col width="20%">
+
+                            <thead>
+                                <tr>
+                                    <th class="zaitoonSubMenuHead" colspan="3">{{ sub.subName }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="i in sub.items | filter: searchKeyword track by $index">
+
+                                    <td style="vertical-align: middle;">
+
+                                        <span ng-if="i.isVeg" style="font-size: 65%; padding-right: 5px;" class="veg-indian-vegetarian"></span>
+                                        <span ng-if="!i.isVeg" style="font-size: 65%; padding-right: 5px;" class="nonveg-indian-vegetarian" ></span>
+
+                                        <tag class="zaitoonItemName">{{ i.itemName }}</tag>
+	                                <tag class="zaitoonItemBrief" ng-if="i.brief">{{ i.brief }}</tag>  
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <strong class="zaitoonItemPrice"><i class="fa fa-inr" style="font-size: 80%"></i> {{ i.itemPrice }}</strong>
+                                    </td>
+                                    <td style="vertical-align: middle;" ng-if="i.isCustom">
+                                        <button ng-if="i.isAvailable" class="btn btn-sm zaitoonAdd open-AddCustomItemDialog" data-id="{{i}}" data-toggle="modal" data-target="#customiseItem" style="float: right"> Add to Cart </button>
+                                        <div ng-if="!i.isAvailable" class="btn-sm zaitoonNoStock" style="float: right">Out of Stock</div>
+                                    </td>
+                                    <td style="vertical-align: middle;" ng-if="!i.isCustom">
+                                        <button ng-if="i.isAvailable" class="btn btn-sm zaitoonAdd" ng-click="addToCart(i)" ng-attr-id="{{'dish_'+i.itemCode}}" style="float: right"> <span  ng-attr-id="{{'dish_name_'+i.itemCode}}">Add to Cart</span> </button>
+                                        <div ng-if="!i.isAvailable" class="btn-sm zaitoonNoStock" style="float: right">Out of Stock</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div> <!-- Menu Area -->
+                
+                </div>
+
+            </div>
+
+
+
+            <div class="col-md-3 mobileCart">
+                <div class="bs-sidebar" role="complementary">
+                    <ul class="nav bs-sidenav myCartMain" style="border-radius: 0px">
+                    <h3 class="z_cartTitle">Your Cart</h3>
+                    <hr style="margin-bottom: 0px">
+                        <div id="cartArea" class="mycartArea">
+                        	<center><img src="assets/images/common/spinner.svg" style="width: 25%"></center>
+                        </div>  <!-- Closing cart area -->
+                    </ul>
+                    <div id="fullCartArea">
+                    </div>
+                </div>
+
+            </div>
+            
+            
+            
+        </div>      
+    </div>
+    
+    <button class="mobileCheckout" data-toggle="modal" data-target="#cartModal" id="mobileCheckoutButton" style="z-index: 50"><img src="assets/images/common/rolling.svg" style="height: 32px"></button>
+
+</div>
+<!-- loading done -->
+
+
+
+<!-- PROMO  - Modal -->
+    <a id="promoWindow" class="modal fade" role="dialog" style="width: 100%; background: none" href="https://play.google.com/store/apps/details?id=com.accelerate.zaitoon">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content" style="border-radius: 0px; padding: 0; background: none;">
+          <div class="modal-header" style="border: none; background: #c0392b">
+            <button type="button" class="close" style="color: #FFF" data-dismiss="modal">&times;</button>            
+          </div>
+          <div class="modal-body" style="width: 100%; background: none; padding: 0">
+            <img src="assets/promos/app_banner.jpg" width="100%">
+          </div>
+        </div>
+
+      </div>
+    </a>
+    
+    
+    <!-- SYSTEM WARNING - Modal -->
+    <div id="systemWarningWindow" class="modal fade" role="dialog" style="width: 100%; background: none">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>            
+          </div>
+          <div class="modal-body">
+            <p style="color: #c52031; font-size: 18px; text-align: center" id="systemErrorMsg"></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+
+
+
+
+    <!-- ADD CUSTOM ITEM - Modal -->
+    <div id="customiseItem" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content" style="border-radius: 0px">
+          <div class="modal-header" style="color: #27ae60">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title" id="customOptionsTitle">Choose an Option</h4>
+          </div>
+          <div class="modal-body">
+            <ol class="rectangle-list" id="customOptionsBody">
+            </ol>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+    
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content" style="border-radius: 0px">
+                <div class="modal-header" style="position: absolute; top:0; right: 0; z-index: 2; border: none">
+                    <!----><button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-if="!isUnavoidable"><span aria-hidden="true">×</span></button><!---->
+                </div>
+          <div class="modal-body" style="text-align: left">
+          	<div id="mobileCartArea"><center><img src="assets/images/common/spinner.svg" style="width: 25%"></center></div>
+          	<div id="mobileFullCartArea"></div>          	
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+
+
+    <!-- Location Warning- Modal -->
+    <div id="warnLocation" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content" style="border-radius: 0px">
+          <div class="modal-body quickLocation" style="padding: 0">
+          
+							<!-- Location search dropdown starts here -->
+		                			<div class="location-search-container" style="display: block">
+	
+		                				<div class="modal-header" style="position: absolute; top:0; right: 0; z-index: 2; border: none">
+						                    <button type="button" class="close locationClose" data-dismiss="modal" aria-label="Close">x</button>
+						                </div>
+	
+	                  					
+								<div class="__dd-sec-top struktur" style="display: block" id="remoteNewLocation">
+									<p style="padding: 0; margin: -8px 0 0 0; font-size: 12px; font-weight: 400; color: #a09f9f; text-transform: uppercase; display: block; width: 100%;">Set Your Location</p>
+									<hr style="border-top: 1px solid #d8d8d8;">
+		                    					<input class="typeahead" google-place-suggestions location="location" style="background: none; width: 100%" type="text" id="locationInput" placeholder="Start typing your location here..." ng-model="googleLocation">
+		                  				</div>
+		                  				
+		                  				<div class="__dd-sec-bottom" ng-show="popularAreasList.length > 0">
+			                    				<div class="__dropdown-head">POPULAR AREAS</div>
+			                    				<div class="__top-cities">
+		                      					<tag class="popularLocation" ng-click="setLocationFromPopular(popular)" ng-repeat="popular in popularAreasList">{{popular.name}}</tag>
+		                  					</div>
+		                				</div>
+	              					</div>
+	              					
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+    
+    
+    <!-- Help - Modal -->
+    <div id="helpWindow" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style="0 5px 15px rgba(0,0,0,.5); border-radius: 0">
+                <div class="modal-header" style="border: none; padding: 0; background: linear-gradient(to right, #ff5a76 0%, #dc6348 100%);">
+                    <p style="color: #FFF;font-weight: 300;font-size: 21px;margin: 15px 0;text-align: center;">Zaitoon Customer Support</p>
+                    <button type="button" class="close ng-scope" style="outline: none;position: absolute;top: 17px;right: 20px; z-index: 2;color: #ffffff;opacity: 0.5;" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                
+                <div class="modal-body" style="text-align: center;">
+                    	<form style="padding: 10px 40px" id="mainHelpContent">			  
+			  <div class="form-group" style="margin-bottom: 5px">
+			    	<label class="helpLabel">Your Concern</label>
+			    	<div id="inline_query_type" style="margin-bottom: 5px">
+			    		<label class="help-container"><input type="radio" name="queryType" value="GENERAL" checked> <span class="help-checkmark"></span><span class="help-mylabel"> General Query/Suggestion</span></label>
+			    		
+			    		<label class="help-container"><input type="radio" name="queryType" value="REFUND"> <span class="help-checkmark"></span><span class="help-mylabel"> Refund Request</span></label>
+				</div>
+				  
+			    	<textarea class="form-control helpInput" placeholder="Write something here ..." style="resize: none; line-height: 1.8em" rows="5" id="helpComment"></textarea>
+			    	<p style="margin: 5px 0px 0px 0px; color: #ecf0f1; font-size: 12px; text-align: right" maxlength="500" id="helpCommentLimit"></p>			    	
+			  </div>
+			  <div class="form-group" id="refundPart">							    			    				    	
+			  </div>
+			  <div class="form-group">
+			  	<div class="col-sm-12" style="padding-left: 0; padding-right: 0">
+			  		<label class="helpLabel">Contact Details</label>
+			  	</div>			    				  
+			      	<div class="col-sm-4" style="padding-left: 0">
+				 	<input type="text" class="form-control helpInputText" id="helpName" placeholder="Your Name">
+				</div>
+				<div class="col-sm-4" style="padding-right: 0; padding-left: 0">
+				 	<input type="number" class="form-control helpInputText" id="helpMobile" placeholder="Registered Mobile">
+				</div>	
+			    	<div class="col-sm-4" style="padding-right: 0">
+				 	<input type="email" class="form-control helpInputText" id="helpEmail" placeholder="Registered Email">
+				</div>			    				    	
+			  </div>
+
+			  	<button type="submit" style="margin-top: 20px; min-width: 150px" class="btn btn-success" onclick="submitHelp()"><i class="fa fa-paper-plane"></i> Send</button>	
+			  	<p style="margin: 5px 0px 0px 0px; color: #c52031" id="helpError"></p>	  
+			</form>
+                    	
+
+                </div>
+                <div class="modal-footer" style="text-align: center;background: #923123;">
+                    <h4 style="color: #ffffff;"><strong>Need a quick help?</strong></h4>
+                    <h6 style="color: #d48275;line-height: 18px;font-size: 12px;font-weight: 400;padding: 0 20px;">If money was deducted from your account but the order was failed, don't worry - your money is safe with us. Payment failure happens mostly because of the network related issues. Please create a Refund Request and we will initiate the refund soon. We usually reply in less than 24 hours. If you have any queries to be addressed immediately, please reach out to  our outlet managers directly, rest assured!</h6>
+                    <a href="https://zaitoon.online/home/#reach" <button="" type="button" class="btn btn-warning" style="background-color: transparent;color: #ffbe07;bo;border-color: #ffbe07;"><i class="fa fa-phone"></i> Contact Outlet Manager</a>
+                </div>
+            </div>
+
+      </div>
+    </div>
+    
+    <!-- Feedback - Modal -->
+    <div id="feedbackWindow" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style=" border-radius: 6px; overflow-y: auto;  border: none;">
+                <div class="modal-body" style="text-align: center;">
+		        <h3 style="color: #34495e; font-size: 24px; font-weight: 200">How was your recent experience with us?
+		        	<br>
+		        	<tag style="font-size:14px; color: #bdc3c7">{{feedbackBrief}}</tag>
+		        	<br><br>
+			        <span style="cursor: pointer; font-size: 32px; color: #fdd121" class="fa fa fa-star-o" id="star1" ng-click="fillTill(1)"></span>
+			        <span style="cursor: pointer; font-size: 32px; color: #fdd121" class="fa fa fa-star-o" id="star2" ng-click="fillTill(2)"></span>
+			        <span style="cursor: pointer; font-size: 32px; color: #fdd121" class="fa fa fa-star-o" id="star3" ng-click="fillTill(3)"></span>
+			        <span style="cursor: pointer; font-size: 32px; color: #fdd121" class="fa fa fa-star-o" id="star4" ng-click="fillTill(4)"></span>
+			        <span style="cursor: pointer; font-size: 32px; color: #fdd121" class="fa fa fa-star-o" id="star5" ng-click="fillTill(5)"></span>
+			        <br><p ng-if="tag!=''" style="color: #34495e; font-weight: 400; font-size: 16px;">{{tag}}</p>
+		        </h3>
+		        
+		        
+			<div ng-if="selection=='N'">
+		          <h4 style="color: #e74c3c; margin: 20px 0px 0px 0px">What went wrong?</h4>
+		          <hr style="margin: 4px 0px">
+		            <div style="padding: 10px">
+		                <span class="btn" ng-class="{'feedbackCheckNegative': negative_feedback.delivery, 'feedbackUncheckNegative': !negative_feedback.delivery}" ng-click="negative_feedback.delivery = !negative_feedback.delivery">Delayed Delivery</span>
+		                <span class="btn" ng-class="{'feedbackCheckNegative': negative_feedback.quality, 'feedbackUncheckNegative': !negative_feedback.quality}" ng-click="negative_feedback.quality = !negative_feedback.quality">Quality not met expectations</span>
+		                <span class="btn" ng-class="{'feedbackCheckNegative': negative_feedback.food, 'feedbackUncheckNegative': !negative_feedback.food}" ng-click="negative_feedback.food = !negative_feedback.food">Not so Good Food</span>
+		                <span class="btn" ng-class="{'feedbackCheckNegative': negative_feedback.service, 'feedbackUncheckNegative': !negative_feedback.service}" ng-click="negative_feedback.service = !negative_feedback.service">Bad Service</span>
+		                <span class="btn" ng-class="{'feedbackCheckNegative': negative_feedback.app, 'feedbackUncheckNegative': !negative_feedback.app}" ng-click="negative_feedback.app = !negative_feedback.app">Website & App</span>
+		                <span class="btn" ng-class="{'feedbackCheckNegative': negative_feedback.other, 'feedbackUncheckNegative': !negative_feedback.other}" ng-click="negative_feedback.other = !negative_feedback.other">Other</span>
+		            </div>
+		        </div>
+		        
+			<div ng-if="selection=='P'">
+		          <h4 style="color: #27ae60; margin: 20px 0px 0px 0px">What made it more awesome?</h4>
+		          <hr style="margin: 4px 0px">
+		            <div style="padding: 10px">
+		                <span class="btn" ng-class="{'feedbackCheck': positive_feedback.delivery, 'feedbackUncheck': !positive_feedback.delivery}" ng-click="positive_feedback.delivery = !positive_feedback.delivery">Delivered on Time</span>
+		                <span class="btn" ng-class="{'feedbackCheck': positive_feedback.quality, 'feedbackUncheck': !positive_feedback.quality}" ng-click="positive_feedback.quality = !positive_feedback.quality">Great Quality</span>
+		                <span class="btn" ng-class="{'feedbackCheck': positive_feedback.food, 'feedbackUncheck': !positive_feedback.food}" ng-click="positive_feedback.food = !positive_feedback.food">Awesome Food</span>
+		                <span class="btn" ng-class="{'feedbackCheck': positive_feedback.service, 'feedbackUncheck': !positive_feedback.service}" ng-click="positive_feedback.service = !positive_feedback.service">Excellent Service</span>
+		                <span class="btn" ng-class="{'feedbackCheck': positive_feedback.app, 'feedbackUncheck': !positive_feedback.app}" ng-click="positive_feedback.app = !positive_feedback.app">Website & App</span>
+		                <span class="btn" ng-class="{'feedbackCheck': positive_feedback.other, 'feedbackUncheck': !positive_feedback.other}" ng-click="positive_feedback.other = !positive_feedback.other">Other</span>
+		            </div>
+		        </div>
+		        
+		        <div style="padding: 20px" ng-show="selection=='N' || selection=='P'">
+				<input type="text" class="feedbackComments" id="commentsBox" placeholder="Do you want to tell us anything in particular? Please write it here." ng-model="commentsFeed">
+	          		<p id="characterCount" style="float: right; padding: 5px 0px; color: #95a5a6; font-size: 80%"></p>		     
+	          	</div>   
+		        		        
+        		        
+                </div>        
+                <div class="modal-footer" ng-show="selection=='N' || selection=='P'" style="border: none; padding: 0">
+			
+          		<span class="btn feedbackButton" id="myFeedSubmit" ng-click="submitFeedback()">Submit</span>
+                </div>
+         </div>
+       </div>
+    </div>
+                        
+   
+   
+    
+    <!-- Beyond Delivery - Modal -->
+    <div id="beyondDeliveryWarning" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style=" border-radius: 6px; overflow-y: auto;  border: none;">
+                <div class="modal-body" style="text-align: center;">
+		        <h3 style="color: #fb1772; font-size: 18px; font-weight: 300; text-transform: uppercase; letter-spacing: 4px;">You are Beyond our Delivery Limits</h3>
+		        <p style="font-size: 18px; font-weight: 300; color: #313131; margin: 30px 0 15px 0; padding: 0 25px;">Selected area is beyond our delivery limits. You can place <tag style="color: #c52031; font-weight: bold;">only Take Away</tag> orders.</p>       
+                </div>        
+                <div class="modal-footer" style="border: none; padding: 0">
+          		<span class="btn btn-danger" style="border-radius: 0; width: 100%; height: 40px;" ng-click="hideBeyondDeliveryWarning()">ACCEPT</span>
+                </div>
+         </div>
+       </div>
+    </div>
+              
+              
+              
+        
+    <!-- Login - Modal -->
+    <div id="loginWindow" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style="0 5px 15px rgba(0,0,0,.5); border-radius: 0">
+                <div class="modal-header" style="border: none;">
+                    <p style="color: #b94c3c;font-weight: 300;font-size: 28px;margin: 10px 0 0 0;text-align: center;">Login to Your Account</p>
+                    <!-- ngIf: !isUnavoidable --><button type="button" class="close ng-scope" style="outline: none; position: absolute;top: 20px;right: 20px;z-index: 2;color: #bdbdbd;" data-dismiss="modal" aria-label="Close" ng-if="!isUnavoidable"><span aria-hidden="true">×</span></button><!-- end ngIf: !isUnavoidable --><!---->
+                </div>
+                <div class="modal-body" style="text-align: center;">
+                    
+                    <div class="row" style="padding-top: 30px">
+                      <div class="col-sm-2"></div>
+                      <div class="col-sm-8">
+                        <div style="width:100%" >
+                          <input class="typeahead" id="loginMobile" onkeyup="activateLogin()" style="width: 100%; font-size: 18px; font-weight: 300; text-align: center; height: 40px;" type="text" maxlength="10" placeholder="Registered Mobile Number">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row" style="padding-top: 20px">
+                      <div class="col-sm-3"></div>
+                      <div class="col-sm-6">
+                        <button class="btn btn-success" style="width: 100%;" id="loginButton" onclick="doLogin()" disabled>Request OTP</button>
+                      </div>
+                    </div>
+                    <div class="row" style="text-align: center">
+                      <div class="col-sm-12">
+                        <p id="loginError" style="padding: 5px 15px; color: #c52031"></p>
+                      </div>
+                    </div>
+
+                    <div id="otpRequest">
+
+                      <!-- <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-8">
+                          <div  style="width:100%" >
+                            <input class="typeahead" id="otpMobile" onkeyup="activateOtp()" style="width:100%; font-size: 16px; font-weight: 300; text-align: center" type="text" maxlength="4" placeholder="Enter the 4 digit OTP">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row" style="padding-top: 20px">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-6">
+                          <button class="btn btn-success" style="width: 100%; border-radius: 0px" id="otpButton" onclick="doOtp()" disabled>Log In</button>
+                        </div>
+                      </div>
+                      <div class="row" style="text-align: center">
+                        <div class="col-sm-12">
+                          <p id="otpError" style="padding: 5px 15px; color: #c52031"></p>
+                        </div>
+                      </div> -->
+
+                    </div>
+                    
+                    <div class="row" style="text-align: center">
+                      <div class="col-sm-12">
+                        <p id="resendOTP" style="padding: 5px 15px; color: #bdc3c7"></p>
+                      </div>
+                    </div>
+                    
+
+
+                </div>
+		<div class="modal-footer" style="text-align: center;background: #FFFEE8; background-image: url(assets/images/common/pattern.jpg);background-repeat: repeat;">
+                    <h4 style="color: #ffffff;"><strong>Not a member yet?</strong></h4>
+                    <h6 style="color: #deb9ba;font-size: 14px;font-weight: 400;">Join the <b>Zaitoon</b> family now and get awesome food on table on time!</h6>
+                    <a href="login/signup.html" <button="" type="button" class="btn btn-warning" style="background-color: transparent; color: #f5861f; border-color:  #f5861f">Signup Now!</a>
+                </div>
+            </div>
+
+        <!-- Modal content-->
+        <!-- <div class="modal-content" style="border-radius: 0px">
+          <div class="modal-header" style="color: #27ae60">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title" style="font-size: 14px; font-weight: 200;">Please Login to Continue<a class="changeCity" href="signup.html"><i class="fa fa-user-circle-o"></i> Sign Up</a></h4>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-sm-9">
+                <div  style="width:100%" >
+                  <input class="typeahead" id="loginMobile" onkeyup="activateLogin()" style="width:100%" type="text" maxlength="10" placeholder="Registered Mobile Number">
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <button class="btn btn-success" style="width: 100%; border-radius: 0px" id="loginButton" onclick="doLogin()" disabled>Continue</button>
+              </div>
+              <p id="loginError" style="padding: 2px 15px; color: #c52031"></p>
+            </div>
+            <div class="row" id="otpRequest"></div>
+          </div>
+        </div> -->
+
+      </div>
+    </div>
+
+
+    <!-- JS and analytics only. -->
+    <!-- Bootstrap core JavaScript
+================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/holder.js"></script>
+    <script src="assets/js/application.js"></script>
+
+
+    <!-- HELP LINE -->
+    <script>
+	$("#inline_query_type input[name='queryType']").click(function(){
+	    if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+	            document.getElementById("refundPart").innerHTML = "";
+	            document.getElementById("helpComment").value = "";
+	    }
+	    else{
+	    	    document.getElementById("helpComment").value = "The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razorpay Payment ID for your reference.";
+		    document.getElementById("refundPart").innerHTML = '<div class="col-sm-12" style="padding-right: 0; padding-left: 0; margin-bottom: 5px"> <input type="text" class="form-control helpReference" id="helpPaymentReference" placeholder="Payment Reference ID"> </div> <p style=" font-size: 12px; color: #a29871; margin-bottom: 20px">Please note that the Payment Reference ID starts with <b style=" color: #4796da;">pay_</b> and which is not same as your Bank\'s Transaction ID. You would have received this via Email from Razorpay. </p>';
+	    }
+	});
+    </script>
+    
+    <script type="text/javascript">
+        //Characters Left in the comments
+        document.addEventListener("DOMContentLoaded", function(event) {
+          document.getElementById('helpComment').onkeyup = function(){
+            document.getElementById('helpCommentLimit').innerHTML =   (500-(this.value.length))+ ' characters left.';
+          }
+        });
+    </script>
+
+	<script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyBPNmSUWcsodpH-DNjap_egW0nW_MrIViw"></script>
+	<script src="assets/js/google-maps-custom.js"></script>
+
+
+
+
+	<div id="webDownloadAppBannerHolder" style="display: none">
+		<div class="webDownloadAppBanner">
+			<div class="row">
+				<div class="col-sm-6">
+					<h1 class="webDownloadAppBannerTitle">Download the App</h1>
+					<p class="webDownloadAppBannerTag">get surprise offers on the app!</p>
+				</div>
+				<div class="col-sm-3" style="text-align: right">
+					<a href="https://play.google.com/store/apps/details?id=com.accelerate.zaitoon"><img src="assets/images/elements/app_download_android_original.png" class="zoomIn" style="max-width: 200px; margin-top: 16px;" width="100%"></a>
+				</div>
+				<div class="col-sm-3">
+					<a href="https://itunes.apple.com/ke/app/zaitoon/id1253240593"><img src="assets/images/elements/app_download_ios_original.png" style="max-width: 200px; margin-top: 16px;" class="zoomIn" width="100%"></a>
+				</div>
+			</div>
+			
+			<tag class="webDownloadAppBannerClose" onclick="clearInstallAppBanner()">Skip</tag>
+		</div>
+	</div>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-38503881-9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-38503881-9');
+</script>
+
+
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>My Account</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Angular -->
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-cookies.min.js"></script>
+    <script src="controllers/account.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-route.js"></script>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="assets/css/zaitoon.min.css" rel="stylesheet">
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/icons/apple-touch-icon-144-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/icons/apple-touch-icon-114-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/icons/apple-touch-icon-72-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" href="assets/icons/apple-touch-icon-57-precomposed.png">
+  <link rel="shortcut icon" href="assets/icons/favicon.png">
+
+  <link href="dist/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+      		<!-- Loading Script -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<style>
+			#loading {
+	    			position: absolute; 
+	    			width: 100%; height: 100%; 
+	    			background: url('assets/images/common/ripple.svg') no-repeat center center;
+	    			background-size: 80px 80px;
+	    			background-color: rgba(0, 0, 0, 0.4);	    			
+	    			z-index: 100;
+			}
+		</style>		
+		<script>
+			$(window).ready(function() {
+				$('#loading').hide();
+			});		
+		</script>
+		
+
+  <script>
+  function logoutNow(){
+    if(getCookie("user")){
+      document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location = "login/";
+    }
+  }
+
+//HELP LINE STUFF
+         function getHelp(){
+	      $('#helpWindow').modal('show'); 
+	      var temp_user_info = "";
+	      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		     		      
+		      document.getElementById("helpName").value = temp_user_info.name;
+		      document.getElementById("helpEmail").value = temp_user_info.email;
+		      document.getElementById("helpMobile").value = temp_user_info.mobile;
+	      }
+	  }
+	  
+	  function submitHelp(){
+	  
+	  	document.getElementById("helpError").innerHTML = "";
+	  	
+	  	var data = {};
+	  	data.name = document.getElementById("helpName").value;
+	  	data.email = document.getElementById("helpEmail").value;
+	  	data.mobile = document.getElementById("helpMobile").value;
+	  	data.comment = document.getElementById("helpComment").value;
+	  	
+	  	if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+		       data.type = "GENERAL";
+		       data.reference = "";
+		}
+		else{
+		       data.type = "REFUND";
+		       data.reference = document.getElementById("helpPaymentReference").value;		
+		}
+		
+
+	  	
+		//Validations
+		if(!(/^[a-zA-Z\s]*$/.test(data.name))){
+			document.getElementById("helpError").innerHTML = "Names can contain only letters";
+		}
+		else if(!(/^\d{10}$/).test(data.mobile)){
+			document.getElementById("helpError").innerHTML = "Mobile Number has to be 10 digit number";
+		}
+		else if((data.comment).length < 10){
+			document.getElementById("helpError").innerHTML = "Please elaborate your query";
+		}
+		else if((data.comment).length > 500){
+			document.getElementById("helpError").innerHTML = "Comments can not contain more than 500 characters";
+		}
+		else if(data.comment == 'The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razorpay Payment ID for your reference.' && data.type == 'REFUND'){
+			document.getElementById("helpError").innerHTML = "Please edit the date and time of placing the order, order amount etc. in comments";
+		}
+		else if(data.type == 'REFUND' && (data.reference).length < 1){
+			document.getElementById("helpError").innerHTML = "Add 'Payment Reference ID' from Razorpay";
+		}
+		else{ //Pass		      
+		      $('#loading').show();
+		      var temp_user_info = "";
+		      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		      	
+		      	data.token = temp_user_info.token;
+		      }
+		      $.ajax({
+		          type: 'POST',
+		          url: 'https://www.accelerateengine.app/food-engine/apis/submitquery.php',
+		          data: JSON.stringify(data),
+		          contentType: "application/json",
+		          dataType: 'json',
+		          success: function(data) {
+		             $('#loading').hide();
+		             if(data.status){
+		                document.getElementById("mainHelpContent").innerHTML = '<p style="font-size: 21px;font-weight: 200;color: #74d29c;padding: 80px 30px;text-align: center;">We have received your message.<br>Your concern will be addressed soon!</p>';
+		                
+		                setTimeout(function(){ $('#helpWindow').modal('hide');}, 4000);
+		             }
+		             else{
+		                document.getElementById("helpError").innerHTML = data.error;
+		             }
+		          }
+		      });
+      
+		}
+	  
+	  }
+	  
+
+
+
+
+      //Get Cookie Info.
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }	  
+      
+  </script>
+</head>
+
+<body ng-app="Account" ng-cloak style="background: #F7F7F7">
+
+<div id="loading"></div>
+
+    <a class="sr-only" href="#content">Skip navigation</a>
+
+    <!-- Docs master nav -->
+
+    <header class="navbar navbar-fixed-top bs-docs-nav" role="banner">
+        <div class="container">
+            <div class="navbar-header" >
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <a href="index.html" class="navbar-brand"><img src="assets/images/common/logo_small.png"></a>
+            </div>
+            <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+                <ul class="nav navbar-nav">
+                    <li class="myCityA">
+                        <a href="index.html">Order Now</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="deals.html">Offers</a>
+                    </li>                    
+                    <li class="active">
+                        <a href="account.html">My Account</a>
+                    </li>
+                    <li ng-if="1" class="myCityA">
+                        <a href="#" onclick="getHelp()">Customer Support</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="#" onclick="logoutNow()">Logout</a>
+                    </li>
+                    <li ng-if="1">
+                    	<a style="color: #FFF"><i class="fa fa-envelope-o"></i> care@zaitoon.online</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Docs page layout -->
+    <div class="bs-header" id="content">
+        <div class="container">
+            <img src="assets/images/elements/designer_logo.png" style="width:70%; max-width:435px">
+        </div>
+    </div>
+
+
+    <div class="container bs-docs-container specialAccountHolder">
+        <div class="row">
+            <div class="col-md-8 specialAccountOrders" role="main" ng-controller="HistoryController" style="background: #FFF; margin: 30px 0px">
+                <div class="bs-docs-section" style="margin-bottom: 50px">
+
+                    <h2 class="zaitoonMenuHead">Your Orders</h2>
+                    <hr style="border-top: 2px solid #c52031; margin-top: 5px;">
+
+                    <div style="text-align: center;" ng-if="!isFound">
+                      <p style="font-size: 16px; color: #bdc3c7; padding-top: 20px">You have never ordered from Zaitoon Online. Wanna place your first order today?</p>
+                      <br><a href="index.html"><button class="btn btn-success zaitoonAdd">Order Now</button></a>
+                    </div>
+
+                    <div class="table-responsive" ng-if="isFound">
+                    <table class="table table-hover" style="margin: 0px;">
+                        <col width="5%" />
+                        <col width="13%" />
+                        <col width="22%" />
+                        <col width="50%" />
+                        <col width="10%" />
+                        <tbody>
+                            <tr ng-repeat="i in item" ng-init="current=1" ng-click="showOrder(i.orderID)">
+                                <td style="vertical-align: middle; color: #c52031; font-size: 130%; font-weight: bold">#{{current + $index}}</td>
+                                <td style="vertical-align: middle;">{{i.orderID}}<tag ng-if="i.status == 5"><br><span class="label label-danger">Cancelled</span></tag><tag ng-if="i.status == 1"><br><span class="label label-success">Processing</span></tag></td>
+                                <td style="vertical-align: middle">{{i.date}}<br><tag style="color: #95a5a6; font-size: 12px;">{{i.timePlace}}</tag></td>
+                                <td style="vertical-align: middle"><span ng-repeat="x in i.cart.items">{{x.itemName}} ({{x.qty}}). </span></td>
+                                <td style="vertical-align: middle"><b><i class="fa fa-inr"></i> {{i.cart.cartTotal + i.cart.cartExtra}}</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr style="margin-top: 0px">
+                    </div>
+
+                    <center><button class="btn zaitoonAdd" ng-click="loadMore()" ng-if="isLeft && isFound">Load More</button></center>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="col-md-4 specialProfileHolder" ng-controller="UserProfileController">
+                <!-- <div id="cartArea"></div> -->
+                <div class=" hidden-print">
+                    <ul class="nav bs-sidenav" style="background: #FFF; border-radius: 0px">
+                    <h3 style="padding-left: 20px; font-size: 12px; color: #34495e; margin-top: 5px;">YOUR PROFILE</h3>
+                    <hr style="border-top: 1px solid #ecf0f1; margin-top: 5px;">
+                    <div style="padding: 20px; margin-top: -15px;" ng-if="toggleFlag != 2">
+
+                                <b class="profileTitle">{{user.name}}</b>
+                                <p><br><tag class="profileSub">MOBILE:</tag><br><b>{{user.mobile}}</b> <i ng-if="user.isVerified" style="color: #1abc9c;" class="fa fa-check-circle" data-toggle="tooltip" data-placement="right" title="Verified Mobile Number"></i></p>
+                                <p><tag class="profileSub">EMAIL:</tag><br><b>{{user.email}}</b></p>
+
+                    </div>
+                    <div style="padding: 20px; margin-top: -15px;" ng-if="toggleFlag == 2">
+
+                                <div class="form-group">
+                                    <input type="text" ng-model="profileName" value="{{user.name}}" class="form-control zaitoonModalIn" id="zaitoonProfileNameEdit" placeholder="Your Name">
+                                </div>
+
+                                <p><tag class="profileSub">Mobile:</tag><br><b>{{user.mobile}}</b> <i style="color: #1abc9c;" ng-if="user.isVerified" class="fa fa-check-circle" data-toggle="tooltip" data-placement="right" title="Verified Mobile Number"></i></p>
+                                <div class="form-group">
+                                    <tag class="profileSub">Email:</tag><br>
+                                    <input type="text" ng-model="profileEmail" value="{{user.email}}" class="form-control zaitoonModalIn" id="zaitoonProfileAddressEdit" placeholder="Email">
+                                </div>
+
+                                <hr>
+                                    <button type="button" class="btn btn-default zaitoonCancel" data-dismiss="modal" ng-click="swapFlag(0)">Cancel</button>
+                                    <button type="button" class="btn btn-default zaitoonSave" data-dismiss="modal" ng-click="saveProfile(profileName, profileEmail)">Save</button>
+
+                    </div>
+                    </ul>
+
+                                <div ng-if="toggleFlag == 0" style="margin-top: -20px;" class="pull-right">
+                                    <!-- <span class="label label-default functionButton" ng-click="swapFlag(1)">Change Password</span> -->
+                                    <span class="label label-default functionButton" ng-click="swapFlag(2)">Edit Profile</span>
+                                </div>
+
+                                <!-- Change Password Option -->
+                                <div class="modal-content zaitoonModal" ng-if="toggleFlag == 1">
+                                  <div class="modal-body">
+                                      <div class="form-group">
+                                        <input type="password" class="form-control zaitoonModalIn" id="zaitoonModalPlace" placeholder="Current Password">
+                                      </div>
+                                      <div class="form-group">
+                                        <input type="password" class="form-control zaitoonModalIn" id="zaitoonModalPlace" placeholder="New Password">
+                                      </div>
+                                      <div class="form-group">
+                                        <input type="password" class="form-control zaitoonModalIn" id="zaitoonModalPlace" placeholder="Confirm Password">
+                                      </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-default zaitoonCancel" data-dismiss="modal" ng-click="swapFlag(0)">Cancel</button>
+                                    <button type="button" class="btn btn-default zaitoonSave" data-dismiss="modal">Change Password</button>
+                                  </div>
+                                </div>
+
+
+                </div>
+            </div>
+    
+    <!-- Help - Modal -->
+    <div id="helpWindow" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style="0 5px 15px rgba(0,0,0,.5); border-radius: 0">
+                <div class="modal-header" style="border: none; padding: 0; background: linear-gradient(to right, #ff5a76 0%, #dc6348 100%);">
+                    <p style="color: #FFF;font-weight: 300;font-size: 21px;margin: 15px 0;text-align: center;">Zaitoon Customer Support</p>
+                    <button type="button" class="close ng-scope" style="outline: none;position: absolute;top: 17px;right: 20px; z-index: 2;color: #ffffff;opacity: 0.5;" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                
+                <div class="modal-body" style="text-align: center;">
+                    	<form style="padding: 10px 40px" id="mainHelpContent">			  
+			  <div class="form-group" style="margin-bottom: 5px">
+			    	<label class="helpLabel">Your Concern</label>
+			    	<div id="inline_query_type" style="margin-bottom: 5px">
+			    		<label class="help-container"><input type="radio" name="queryType" value="GENERAL" checked> <span class="help-checkmark"></span><span class="help-mylabel"> General Query/Suggestion</span></label>
+			    		
+			    		<label class="help-container"><input type="radio" name="queryType" value="REFUND"> <span class="help-checkmark"></span><span class="help-mylabel"> Refund Request</span></label>
+				</div>
+				  
+			    	<textarea placeholder="Write something here ..." class="form-control helpInput" style="resize: none; line-height: 1.8em" rows="5" id="helpComment"></textarea>
+			    	<p style="margin: 5px 0px 0px 0px; color: #ecf0f1; font-size: 12px; text-align: right" maxlength="500" id="helpCommentLimit"></p>			    	
+			  </div>
+			  <div class="form-group" id="refundPart">							    			    				    	
+			  </div>
+			  <div class="form-group">
+			  	<div class="col-sm-12" style="padding-left: 0; padding-right: 0">
+			  		<label class="helpLabel">Contact Details</label>
+			  	</div>			    				  
+			      	<div class="col-sm-4" style="padding-left: 0">
+				 	<input type="text" class="form-control helpInputText" id="helpName" placeholder="Your Name">
+				</div>
+				<div class="col-sm-4" style="padding-right: 0; padding-left: 0">
+				 	<input type="number" class="form-control helpInputText" id="helpMobile" placeholder="Registered Mobile">
+				</div>	
+			    	<div class="col-sm-4" style="padding-right: 0">
+				 	<input type="email" class="form-control helpInputText" id="helpEmail" placeholder="Registered Email">
+				</div>			    				    	
+			  </div>
+
+			  	<button type="submit" style="margin-top: 20px; min-width: 150px" class="btn btn-success" onclick="submitHelp()"><i class="fa fa-paper-plane"></i> Send</button>	
+			  	<p style="margin: 5px 0px 0px 0px; color: #c52031" id="helpError"></p>	  
+			</form>
+                    	
+
+                </div>
+                <div class="modal-footer" style="text-align: center;background: #923123;">
+                    <h4 style="color: #ffffff;"><strong>Need a quick help?</strong></h4>
+                    <h6 style="color: #d48275;line-height: 18px;font-size: 12px;font-weight: 400;padding: 0 20px;">If money was deducted from your account but the order was failed, don't worry - your money is safe with us. Payment failure happens mostly because of the network related issues. Please create a Refund Request and we will initiate the refund soon. We usually reply in less than 24 hours. If you have any queries to be addressed immediately, please reach out to  our outlet managers directly, rest assured!</h6>
+                    <a href="https://zaitoon.online/home/#reach" <button="" type="button" class="btn btn-warning" style="background-color: transparent;color: #ffbe07;bo;border-color: #ffbe07;"><i class="fa fa-phone"></i> Contact Outlet Manager</a>
+                </div>
+            </div>
+
+      </div>
+    </div>
+    
+    
+        </div>
+    </div>
+
+    <!-- JS and analytics only. -->
+    <!-- Bootstrap core JavaScript
+================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/holder.js"></script>
+    <script src="assets/js/application.js"></script>
+
+
+    <!-- For Verified Mobile Number -->
+    <script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    </script>
+    
+    <!-- HELP LINE -->
+    <script>
+	$("#inline_query_type input[name='queryType']").click(function(){
+	    if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+	            document.getElementById("refundPart").innerHTML = "";
+	            document.getElementById("helpComment").value = "";
+	    }
+	    else{
+	    	    document.getElementById("helpComment").value = "The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razorpay Payment ID for your reference.";
+		    document.getElementById("refundPart").innerHTML = '<div class="col-sm-12" style="padding-right: 0; padding-left: 0; margin-bottom: 20px"> <input type="text" class="form-control helpReference" id="helpPaymentReference" placeholder="Payment Reference ID"> </div> <p style=" font-size: 12px; color: #a29871; margin-bottom: 20px">Please note that the Payment Reference ID starts with <b style=" color: #4796da;">pay_</b> and which is not same as your Bank\'s Transaction ID. You would have received this via Email from Razorpay. </p>';
+	    }
+	});
+    </script>
+    
+    <script type="text/javascript">
+        //Characters Left in the comments
+        document.addEventListener("DOMContentLoaded", function(event) {
+          document.getElementById('helpComment').onkeyup = function(){
+            document.getElementById('helpCommentLimit').innerHTML =   (500-(this.value.length))+ ' characters left.';
+          }
+        });
+    </script>
+    
+
+
+</body>
+
+</html>

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-38503881-9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-38503881-9');
+</script>
+
+
+
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Checkout</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- Custom CSS -->
+    <link href="assets/css/zaitoon.min.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/icons/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/icons/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/icons/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="assets/icons/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="assets/icons/favicon.png">
+
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-cookies.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/angular-route.js"></script>
+    <script src="controllers/checkout.js?version=1.0.1"></script>
+    
+        	<!-- Loading Script -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<style>
+			#loading {
+	    			position: absolute; 
+	    			width: 100%; height: 100%; 
+	    			background: url('assets/images/common/ripple.svg') no-repeat center center;
+	    			background-size: 80px 80px;
+	    			background-color: rgba(0, 0, 0, 0.4);	    			
+	    			z-index: 100;
+			}
+		</style>		
+		<script>
+			$(window).ready(function() {
+				$('#loading').hide();
+                                $('#loadingPayment').modal('hide');
+			});		
+		</script>
+		
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script type="text/javascript">
+    
+    //One time clear - localstorage check (GST Changes)
+    if(!getMyCookie("gstnewcheckout")){       
+               //Set cookie
+               var d = new Date();
+               d.setTime(d.getTime() + 12960000000); //150 days
+               var expires = "expires="+ d.toUTCString();
+               document.cookie = "gstnewcheckout" + "=" + "GST_NEW_CHECKOUT_CACHE_CLEARED" + ";" + expires + ";path=/";
+               
+               window.location.reload(true);    
+    }
+    
+      //Get Cookie Info.
+      function getMyCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }	  
+    	   
+    	   
+    	   
+
+        function renderCart(){
+
+          //is it a take away?
+          var isTakeAway = false;
+          var takeawayBar = '';
+          if(localStorage.getItem("isTakeAway"))
+            isTakeAway = localStorage.getItem("isTakeAway");
+
+          //Outlet info available?
+          var isOutletSet = false;
+          //var outletInfo = [];
+          if(localStorage.getItem("outletInfo") != null){
+            isOutletSet = true;
+            var outletInfo = JSON.parse(localStorage.getItem("outletInfo"));
+          }
+          else{
+            isOutletSet = false;
+          }
+
+
+        var row = "";
+
+        if(!localStorage.getItem("itemsInfo")){
+          window.location = "index.html";
+        }
+
+        if (JSON.parse(localStorage.getItem("itemsInfo")).length != 0) // If the cart is not empty.
+        {
+
+        var info = JSON.parse(localStorage.getItem("itemsInfo"));
+        var sub_total = 0;
+        var i = 0;
+
+        while(i<info.length)   {
+
+            //Jugaad to hide border in the first row.
+            var noBorder = "";
+            if(i == 0){noBorder = 'style="border-top:none; padding-top: 20px;"'}
+
+             row = row +'<tr><td class="cartDescription" '+noBorder+'> <p style="font-size: 14px; color: #34495e">'+info[i].itemName+'</p>';
+             if(info[i].isCustom)
+             {
+                row = row + '<p style="font-size: 9px; color: grey; margin-top: -10px;">Choice: '+info[i].variant+'</p>';
+             }
+             row = row + '</td> <td class="cart_quantity" '+noBorder+'> <div class="cartButtons"> <span id="item_count_12"> x'+info[i].qty+' </span></div> </td> <td class="cart_price" '+noBorder+'> <p><i class="fa fa-inr"></i> <span id="item_price_12">'+info[i].itemPrice+'</span></p> </td> </tr>';
+
+             sub_total += (info[i].qty*info[i].itemPrice);
+             i++;
+        }
+
+
+
+        //TAX AND DELIVERY CHARGES
+        var extras = "";
+        
+        var stateTaxRender = "";
+        var centralTaxRender = "";
+        var containerChargesRender = "";
+        
+        var amountStateTax = 0;
+        var amountCentralTax = 0;
+        var amountContainer = 0;        
+
+        if(!isOutletSet){
+          if(isTakeAway == 'true'){
+              amountContainer = (sub_total*.05).toFixed(2);
+              containerChargesRender = '<tr class="shipping-cost"> <td><grey>Delivery Charges (5%)</grey></td> <td><grey><i class="fa fa-inr"></i> '+amountContainer+'</grey></td> </tr>'
+          }
+          else {
+              amountContainer = (sub_total*.07).toFixed(2);
+              containerChargesRender = '<tr class="shipping-cost"> <td><grey>Delivery Charges (7%)</grey></td> <td><grey><i class="fa fa-inr"></i> '+amountContainer+'</grey></td> </tr>'
+          }
+        }
+        else{
+        
+          //State Tax Info.
+          if(outletInfo.isStateTaxCollected){
+            	amountStateTax = (sub_total*(outletInfo.stateTaxPercentage)).toFixed(2);
+              	stateTaxRender = '<tr class="shipping-cost"> <td><grey>SGST ('+Math.round(outletInfo.stateTaxPercentage*1000)/10+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountStateTax+' </grey></td> </tr>';              
+          }
+          
+          //Central Tax Info.
+          if(outletInfo.isCentralTaxCollected){
+            	amountCentralTax = (sub_total*(outletInfo.centralTaxPercentage)).toFixed(2);
+              	centralTaxRender = '<tr class="shipping-cost"> <td><grey>CGST ('+Math.round(outletInfo.centralTaxPercentage*1000)/10+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountCentralTax+' </grey></td> </tr>';              
+          }          
+          
+          //Container Charges
+          if(outletInfo.isParcelCollected){
+          	if(isTakeAway == 'true'){          
+          		amountContainer = (sub_total*(outletInfo.parcelPercentagePickup)).toFixed(2);
+              		containerChargesRender = '<tr class="shipping-cost"> <td><grey>Container Charges ('+Math.round(outletInfo.parcelPercentagePickup*100)+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountContainer+' </grey></td> </tr>';    
+              	}
+              	else{
+          		amountContainer = (sub_total*(outletInfo.parcelPercentageDelivery)).toFixed(2);
+              		containerChargesRender = '<tr class="shipping-cost"> <td><grey>Container Charges ('+Math.round(outletInfo.parcelPercentageDelivery*100)+'%)</grey></td> <td><grey> <i class="fa fa-inr"></i> '+amountContainer+' </grey></td> </tr>';                  	
+              	}          
+          }
+          
+        }
+        
+        //All the extra charges consolidated
+        extras = stateTaxRender + centralTaxRender + containerChargesRender;
+
+        //Calculate Grand Total:
+        var grand_total = 0;
+	grand_total = parseFloat(sub_total) + parseFloat(amountStateTax) + parseFloat(amountCentralTax) + parseFloat(amountContainer);
+	grand_total = Math.round(grand_total);
+	
+
+        document.getElementById("cartArea").innerHTML  = '<div style="max-height:280px; overflow-y:auto;" id="ScrollStyle"><table class="table table-condensed" style="margin-bottom: 0px; margin-top: -16px;"> <tbody></tbody> <colgroup><col width="62%"> <col width="15%"> <col width="23%"> </colgroup> <tbody> '+row+' </tbody> </table></div><table class="table table-condensed" style="margin-bottom: -20px; font-weight: bold;"> <tbody> <tr> <td><grey>Cart Sub Total</grey></td> <td><grey><i class="fa fa-inr"></i> '+sub_total+'</grey></td> </tr> <tr class="shipping-cost" id="discountBar"> <td><grey>Discounts</grey></td> <td><grey><i class="fa fa-inr"></i><tag id="discountTab"> 0</tag></grey></td> </tr>'+extras+'<tr> <td><red>Grand Total</red></td> <td><strong><red><span><i class="fa fa-inr"></i> <tag id="grandTotal">'+grand_total+'</tag></span></red></strong></td> </tr> </tbody> </table> <br>';
+        document.getElementById("fullCartArea").innerHTML = "";
+    }
+    else{
+        document.getElementById("cartArea").innerHTML = '<center> <img src="assets/images/elements/emptycart.png" width="50%"> <p style="color: #bdc3c7">Your Cart is Empty.</p> </center>';
+        document.getElementById("fullCartArea").innerHTML  = '<p style="color: #bdc3c7; padding-top: 5px; font-size: 11px;">Add items to the cart to place a fresh order. You can quickly <a class="label label-default greyLabel" href="account.html" style="font-size: 10px;">Repeat an Order</a> you made with Zaitoon before.</p>';
+    }
+    }
+
+    function logoutNow(){
+      if(getCookie("user")){
+        document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location = "login/";
+      }
+    }
+
+    
+    
+    
+         //HELP LINE STUFF
+         function getHelp(){
+	      $('#helpWindow').modal('show'); 
+	      var temp_user_info = "";
+	      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		     		      
+		      document.getElementById("helpName").value = temp_user_info.name;
+		      document.getElementById("helpEmail").value = temp_user_info.email;
+		      document.getElementById("helpMobile").value = temp_user_info.mobile;
+	      }
+	  }
+	  
+	  function submitHelp(){
+	  
+	  	document.getElementById("helpError").innerHTML = "";
+	  	
+	  	var data = {};
+	  	data.name = document.getElementById("helpName").value;
+	  	data.email = document.getElementById("helpEmail").value;
+	  	data.mobile = document.getElementById("helpMobile").value;
+	  	data.comment = document.getElementById("helpComment").value;
+	  	
+	  	if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+		       data.type = "GENERAL";
+		       data.reference = "";
+		}
+		else{
+		       data.type = "REFUND";
+		       data.reference = document.getElementById("helpPaymentReference").value;		
+		}
+		
+
+	  	
+		//Validations
+		if(!(/^[a-zA-Z\s]*$/.test(data.name))){
+			document.getElementById("helpError").innerHTML = "Names can contain only letters";
+		}
+		else if(!(/^\d{10}$/).test(data.mobile)){
+			document.getElementById("helpError").innerHTML = "Mobile Number has to be 10 digit number";
+		}
+		else if((data.comment).length < 10){
+			document.getElementById("helpError").innerHTML = "Please elaborate your query";
+		}
+		else if((data.comment).length > 500){
+			document.getElementById("helpError").innerHTML = "Comments can not contain more than 500 characters";
+		}
+		else if(data.comment == 'The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razorpay Payment ID for your reference.' && data.type == 'REFUND'){
+			document.getElementById("helpError").innerHTML = "Please edit the date and time of placing the order, order amount etc. in comments";
+		}
+		else if(data.type == 'REFUND' && (data.reference).length < 1){
+			document.getElementById("helpError").innerHTML = "Add 'Payment Reference ID' from Razorpay";
+		}
+		else{ //Pass		      
+		      $('#loading').show();
+		      var temp_user_info = "";
+		      if(temp_user_info = JSON.parse(decodeURIComponent(getCookie("user")))){		      	
+		      	data.token = temp_user_info.token;
+		      }
+		      $.ajax({
+		          type: 'POST',
+		          url: 'https://www.accelerateengine.app/food-engine/apis/submitquery.php',
+		          data: JSON.stringify(data),
+		          contentType: "application/json",
+		          dataType: 'json',
+		          success: function(data) {
+		             $('#loading').hide();
+		             if(data.status){
+		                document.getElementById("mainHelpContent").innerHTML = '<p style="font-size: 21px;font-weight: 200;color: #74d29c;padding: 80px 30px;text-align: center;">We have received your message.<br>Your concern will be addressed soon!</p>';
+		                setTimeout(function(){ $('#helpWindow').modal('hide');}, 4000);
+		             }
+		             else{
+		                document.getElementById("helpError").innerHTML = data.error;
+		             }
+		          }
+		      });
+      
+		}
+	  
+	  }
+	  
+
+
+
+
+      //Get Cookie Info.
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+      }	  
+      
+      
+
+        </script>
+
+    <link href="dist/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+
+<body onload="renderCart()" ng-app="CheckOut" ng-cloak style="background: #F7F7F7">
+
+<div id="loading"></div>
+
+
+    <a class="sr-only" href="#content">Skip navigation</a>
+
+    <!-- Docs master nav -->
+
+    <header class="navbar navbar-fixed-top bs-docs-nav" role="banner">
+        <div class="container">
+            <div class="navbar-header" >
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <i class="fa fa-bars"></i>
+                </button>
+                <a href="index.html" class="navbar-brand"><img src="assets/images/common/logo_small.png"></a>
+            </div>
+            <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+                <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="index.html">Order Now</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="deals.html">Offers</a>
+                    </li>                         
+                    <li class="myCityA">
+                        <a href="account.html">My Account</a>
+                    </li>
+                    <li ng-if="1" class="myCityA">
+                        <a href="#" onclick="getHelp()">Customer Support</a>
+                    </li>
+                    <li class="myCityA">
+                        <a href="#" onclick="logoutNow()">Logout</a>
+                    </li>
+                    <li ng-if="1">
+                    	<a style="color: #FFF"><i class="fa fa-envelope-o"></i> care@zaitoon.online</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Docs page layout -->
+    <div class="bs-header" id="content">
+        <div class="container">
+            <img src="assets/images/elements/designer_logo.png" style="width:70%; max-width:435px">
+        </div>
+    </div>
+
+
+
+    <div class="container bs-docs-container checkoutAreaSpecialHolder" ng-controller="CheckoutController">
+        <div class="row" ng-if="isLoggedIn">
+            <div class="col-md-7 checkoutAreaSpecial" role="main" style="background: #FFF; margin: 30px 0px">
+                <div class="bs-docs-section">
+
+                    <h2 class="zaitoonMenuHead">Checkout <p ng-if="isTakeAway" style="float: right; font-size: 14px; font-weight: bold; color: #FFF; background: #3498db; padding: 5px;">TAKE AWAY</p></h2>
+                    <hr style="border-top: 2px solid #c52031; margin-top: 5px;">
+                    <div class="">
+                        <table class="table table-striped" ng-if="!isTakeAway">
+                            <colgroup>
+                                <col width="2%">
+                                <col width="98%">
+                            </colgroup>
+                            <thead class="checkOutHeads">
+                                <tr>
+                                    <th style="border-bottom: none">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </th>
+                                    <th style="border-bottom: none">Delivery Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: white;">
+                                    <td></td>
+                                    <td><b class="CheckOutSubHead">Delivery Address</b>
+                                    <span class="btn btn-sm btn-success zaitoonAdd" style="float: right" ng-click="openSavedAddress()">See Saved Addresses</span>
+                                      <div class="row">
+                                        <div class="col-sm-12">
+                                          <div class="form-group" style="margin-bottom: 5px;">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Recepient Name" ng-model="checkoutAddress.name">
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                          <div class="form-group">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Mobile Number" ng-model="checkoutAddress.contact">
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col-sm-6">
+                                          <div class="form-group" style="margin-bottom: 5px;">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Flat/House No." ng-model="checkoutAddress.flatNo">
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                          <div class="form-group" style="margin-bottom: 5px;">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Flat/House Name" ng-model="checkoutAddress.flatName">
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col-sm-6">
+                                          <div class="form-group" style="margin-bottom: 5px;">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Landmark" ng-model="checkoutAddress.landmark">
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                          <div class="form-group">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Locality" ng-model="checkoutAddress.area">
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: none"></td>
+                                    <td style="border: none"><b class="CheckOutSubHead">Any notes to the Chef?</b>
+                                    <div class="form-group">
+                                        <textarea rows="3" id="chefNotes" maxlength="150" class="form-control ng-pristine ng-untouched ng-valid ng-empty ng-valid-maxlength checkOutText" style="border: 1px solid #ecf0f1" placeholder="More sugar, less spice? Your preferences go here." ng-model="orderStuff.comments"></textarea>
+                                        <p id="alertNotes" style="color: #bdc3c7; margin-top: 3px;"></p>
+                                    </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                        <table class="table table-striped" ng-if="isTakeAway">
+                            <colgroup>
+                                <col width="2%">
+                                <col width="98%">
+                            </colgroup>
+                            <thead class="checkOutHeads">
+                                <tr>
+                                    <th style="border-bottom: none">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </th>
+                                    <th style="border-bottom: none">Pickup Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: white;">
+                                    <td></td>
+                                    <td>
+                                      <div class="dropdown">
+                                        <b ng-if="selectedPickup =='IITMADRAS'" class="CheckOutSubHead">Pickup Outlet</b>
+                                        <p ng-if="selectedPickup =='IITMADRAS'" style="font-size: 11px; color: #bdc3c7;">IIT Madras outlet serves only the campus community. Orders can not be picked up from any other outlets.</p>
+                                        <p ng-if="selectedPickup =='IITMADRAS'" style="font-size: 16px; color: #34495e;">Quark Canteen, Opp. to Saraswathi Hostel, IIT Madras</p>
+
+                                        <b ng-if="selectedPickup !='IITMADRAS'" class="CheckOutSubHead">Nearest Outlet</b>
+                                        <p ng-if="selectedPickup !='IITMADRAS'" style="font-size: 11px; color: #bdc3c7;">We have set the pickup location to your nearest outlet. Change it if you want to.</p>
+                                        <select class="myOutletSelection"
+                                          ng-if="selectedPickup !='IITMADRAS'"
+                                          ng-model="selectedPickup"
+                                          ng-init="fetchOutlets()" required
+                                          ng-options="option.value as option.name for option in outletsList"
+                                          ng-change="onOutletChange(selectedPickup)"
+                                          ng-class ="{'myOutletSelection':true}">
+                                        </select>
+
+                                      </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: none"></td>
+                                    <td style="border: none"><b class="CheckOutSubHead">Any notes to the Chef?</b>
+                                    <div class="form-group">
+                                        <textarea rows="3" id="chefNotes" maxlength="150" class="form-control ng-pristine ng-untouched ng-valid ng-empty ng-valid-maxlength checkOutText" style="border: 1px solid #ecf0f1" placeholder="More sugar, less spice? Your preferences go here." ng-model="orderStuff.comments"></textarea>
+                                        <p id="alertNotes" style="color: #bdc3c7; margin-top: 3px;"></p>
+                                    </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                        <table class="table">
+                            <colgroup>
+                                <col width="2%">
+                                <col width="98%">
+                            </colgroup>
+                            <thead class="checkOutHeads">
+                                <tr>
+                                    <th style="border-bottom: none">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </th>
+                                    <th style="border-bottom: none">Payment Options</th>
+                                </tr>
+                            </thead>
+                            <tbody ng-if="isPrepaidAllowed">
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                            <div class="btn-group btn-group-vertical" data-toggle="buttons">
+                                              <label class="btn active" ng-click="setMode('PRE')">
+                                                <input type="radio" name='gender1' checked><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i> <span>  Online Payment</span>
+                                              </label>
+                                              <label class="btn" ng-click="setMode('COD')" ng-if="!isTakeAway">
+                                                <input type="radio" name='gender1'><i class="fa fa-circle-o fa-2x"></i><i class="fa fa-dot-circle-o fa-2x"></i><span> Cash on Delivery</span>
+                                              </label>
+                                            </div>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody ng-if="!isPrepaidAllowed">
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <p style="color: #1abc9c; margin: 0; padding-top: 10px; font-weight: bold; font-size: 16px">Cash On Delivery (COD)</p>
+                                        <p style="color: #bdc3c7; font-size: 10px">Online Payment is currently unavailable.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3 checkoutSpecialCart">
+                <div class="" role="complementary" style="margin-bottom: 30px">
+                    <ul class="nav bs-sidenav myCartMain" style="border-radius: 0px">
+                    <h3 class="z_cartTitle">Your Cart</h3>
+                    <hr style="margin-bottom: 0px">
+                        <div id="cartArea" class="mycartArea">
+                        	<center><img src="assets/images/common/spinner.svg" style="width: 25%"></center>
+                        </div>  <!-- Closing cart area -->
+                    </ul>
+                    <div id="fullCartArea">
+                    </div>
+                    
+                    <div class="specialCouponApplyArea">
+                      <b class="CheckOutSubHead">Apply Coupon Code</b>
+                      <div class="input-group" style="margin-top: 10px">
+                          <input id="couponCode" type="text" class="form-control couponIn" placeholder="Coupon Code" ng-model="coupon" ng-keyup="invalidateCoupon()" aria-describedby="basic-addon2">
+                          <span class="input-group-addon" ng-click="applyCoupon(coupon)" id="basic-addon2">Apply</span>
+                      </div>
+                      <p ng-if="isCouponApplied" style="padding-top: 5px;">
+                        <tag ng-if="!isCouponFailed" style="color: #27AE60">Applied successfully! You get Rs. {{couponDiscount}} discount.</tag>
+                        <tag ng-if="isCouponFailed" style="color: #FF5733">Failed. {{couponError}}</tag>
+                      </p>
+                    </div>
+
+                    <button ng-if="!isPaymentPending" type="button" class="btn btn-success check_out specialCheckoutButton" style="width: 100%; margin-top: 20px; border-radius: 0px; font-size: 16px;" ng-click="checkout(checkoutAddress, orderStuff, coupon)">Place Order</button>
+                    <button ng-if="isPaymentPending && !isCOD" type="button" class="btn btn-warning check_out specialCheckoutButton" style="width: 100%; margin-top: 20px; border-radius: 0px; font-size: 16px;">Processing Payment</button>
+                    <p style="padding-top: 5px; text-decoration: underline; text-align: center" ng-if="isPaymentPending && !isCOD" ng-click="restartOrder()">Retry Payment</p>
+                    <button ng-if="isPaymentPending && isCOD" type="button" class="btn btn-warning check_out specialCheckoutButton" style="width: 100%; margin-top: 20px; border-radius: 0px; font-size: 16px;">Processing Order</button>
+                    <p id="orderAlert" style="color: #c52031; padding: 10px 0px"></p>
+                </div>
+
+  
+      <!-- Saved Addresses - Modal -->
+      <div id="addressSuggestions" class="modal fade" role="dialog">
+         <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content" style="border-radius: 0px">
+               <div class="modal-header" style="color: #27ae60">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title savedAddressTitle" style="color: #c52031">Saved Addresses List</h4>
+               </div>
+               <div class="modal-body">
+               
+               
+               
+               
+		<!-- Featured Items -->
+		<div class="row row-horizon" style="padding: 5px 15px">
+		  <div class="col-sm-5 featuredItem"  style="padding: 10px" ng-repeat="address in myAddressList track by $index">	            	              	                	          	
+	                <p class="featureName">
+	                		{{address.name}}<br>
+	                		{{address.flatNo}}, {{address.flatName}}<br>
+	                		{{address.area}}<br>
+	                		Mob. {{address.contact}}
+	                </p>
+	                <button class="btn btn-sm btn-outline btn-info" ng-click="copyThisAddress(address)">Use Address</button>
+	                <span class="btn btn-sm" style="border: none; display: inline; float: right; color: #e74c3c" ng-click="deleteThisAddress(address.id)"><i class="fa fa-trash-o"></i></span>           
+		  </div>	  		  
+		</div>
+		  
+		  <p ng-if="!addNewAddressFlag && myAddressList.length == 0" style="font-size: 16px; color: #95a5a6; margin-left: 10px">No saved address found</p>
+		  <span ng-if="!addNewAddressFlag && myAddressList.length < 5" class="btn btn-sm zaitoonAdd" style="margin-left: 10px" ng-click="addNewAddress()">Add New Address</span>			                  
+                  <hr ng-if="addNewAddressFlag && myAddressList.length != 0">
+                  <div ng-if="addNewAddressFlag" style="padding: 0px 20px">
+                  		<h3 style="font-size: 21px; color: #2ecc71; margin: 0px">Add New Address to List</h3>                  	
+				  <div class="row">
+                                        <div class="col-sm-12">
+                                          <div class="form-group" style="margin-bottom: 5px;">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Recepient Name" ng-model="newAddressContent.name">
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                          <div class="form-group">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Mobile Number" ng-model="newAddressContent.contact">
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col-sm-6">
+                                          <div class="form-group" style="margin-bottom: 5px;">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Flat/House No." ng-model="newAddressContent.flatNo">
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                          <div class="form-group" style="margin-bottom: 5px;">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Flat/House Name" ng-model="newAddressContent.flatName">
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col-sm-6">
+                                          <div class="form-group" style="margin-bottom: 5px;">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Landmark" ng-model="newAddressContent.landmark">
+                                          </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                          <div class="form-group">
+                                            <input type="text" class="form-control checkOutFields checkOutIn" id="" placeholder="Locality" ng-model="newAddressContent.area">
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <button class="btn btn-success" ng-click="saveNewAddressToList()">Add to List</button>
+                                      <p style="margin: 5px 0px 0px 0px; color: #e74c3c" ng-if="newError != ''">{{newError}}</p>
+                                      
+                  	
+                  </div>                  
+               </div>
+            </div>
+         </div>
+      </div>
+        
+  
+    <!-- Help - Modal -->
+    <div id="helpWindow" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content" style="0 5px 15px rgba(0,0,0,.5); border-radius: 0">
+                <div class="modal-header" style="border: none; padding: 0; background: linear-gradient(to right, #ff5a76 0%, #dc6348 100%);">
+                    <p style="color: #FFF;font-weight: 300;font-size: 21px;margin: 15px 0;text-align: center;">Zaitoon Customer Support</p>
+                    <button type="button" class="close ng-scope" style="outline: none;position: absolute;top: 17px;right: 20px; z-index: 2;color: #ffffff;opacity: 0.5;" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                
+                <div class="modal-body" style="text-align: center;">
+                    	<form style="padding: 10px 40px" id="mainHelpContent">			  
+			  <div class="form-group" style="margin-bottom: 5px">
+			    	<label class="helpLabel">Your Concern</label>
+			    	<div id="inline_query_type" style="margin-bottom: 5px">
+			    		<label class="help-container"><input type="radio" name="queryType" value="GENERAL" checked> <span class="help-checkmark"></span><span class="help-mylabel"> General Query/Suggestion</span></label>
+			    		
+			    		<label class="help-container"><input type="radio" name="queryType" value="REFUND"> <span class="help-checkmark"></span><span class="help-mylabel"> Refund Request</span></label>
+				</div>
+				  
+			    	<textarea class="form-control helpInput" placeholder="Write something here ..." style="resize: none; line-height: 1.8em" rows="5" id="helpComment"></textarea>
+			    	<p style="margin: 5px 0px 0px 0px; color: #ecf0f1; font-size: 12px; text-align: right" maxlength="500" id="helpCommentLimit"></p>			    	
+			  </div>
+			  <div class="form-group" id="refundPart">							    			    				    	
+			  </div>
+			  <div class="form-group">
+			  	<div class="col-sm-12" style="padding-left: 0; padding-right: 0">
+			  		<label class="helpLabel">Contact Details</label>
+			  	</div>			    				  
+			      	<div class="col-sm-4" style="padding-left: 0">
+				 	<input type="text" class="form-control helpInputText" id="helpName" placeholder="Your Name">
+				</div>
+				<div class="col-sm-4" style="padding-right: 0; padding-left: 0">
+				 	<input type="number" class="form-control helpInputText" id="helpMobile" placeholder="Registered Mobile">
+				</div>	
+			    	<div class="col-sm-4" style="padding-right: 0">
+				 	<input type="email" class="form-control helpInputText" id="helpEmail" placeholder="Registered Email">
+				</div>			    				    	
+			  </div>
+
+			  	<button type="submit" style="margin-top: 20px; min-width: 150px" class="btn btn-success" onclick="submitHelp()"><i class="fa fa-paper-plane"></i> Send</button>	
+			  	<p style="margin: 5px 0px 0px 0px; color: #c52031" id="helpError"></p>	  
+			</form>
+                    	
+
+                </div>
+                <div class="modal-footer" style="text-align: center;background: #923123;">
+                    <h4 style="color: #ffffff;"><strong>Need a quick help?</strong></h4>
+                    <h6 style="color: #d48275;line-height: 18px;font-size: 12px;font-weight: 400;padding: 0 20px;">If money was deducted from your account but the order was failed, don't worry - your money is safe with us. Payment failure happens mostly because of the network related issues. Please create a Refund Request and we will initiate the refund soon. We usually reply in less than 24 hours. If you have any queries to be addressed immediately, please reach out to  our outlet managers directly, rest assured!</h6>
+                    <a href="https://zaitoon.online/home/#reach" <button="" type="button" class="btn btn-warning" style="background-color: transparent;color: #ffbe07;bo;border-color: #ffbe07;"><i class="fa fa-phone"></i> Contact Outlet Manager</a>
+                </div>
+            </div>
+
+      </div>
+    </div>
+
+
+    <!-- Payment - Modal -->
+    <div id="loadingPayment" class="modal fade" role="dialog" style="width: 100%; background: none">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content" style="border-radius: 0px; padding: 0; background: none;">          
+          <div class="modal-body" style="width: 100%; background: #c0392b; padding: 20px">
+            <center><img src="assets/images/common/dots.svg" width="80px" id="loadingDot"></center>
+            <p style="color: #f39c12; font-weight: 200; font-size: 21px; text-align: center" id="paymentTimer"></p>
+            <p style="color: #FFF; font-weight: 200; font-size: 18px; text-align: center" id="paymentNote">Amount received. Placing order with Zaitoon.</p>
+            <p style="color: #DCDCDC; font-weight: 200; font-size: 14px; text-align: center" id="paymentWarn">Please wait. Do NOT Close or Refresh.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- JS and analytics only. -->
+    <!-- Bootstrap core JavaScript
+================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/holder.js"></script>
+    <script src="assets/js/application.js"></script>
+
+    <script type="text/javascript">
+        //Characters Left in the comments
+        document.addEventListener("DOMContentLoaded", function(event) {
+          document.getElementById('chefNotes').onkeyup = function(){
+            document.getElementById('alertNotes').innerHTML =   (150-(this.value.length))+ ' characters left.';
+          }
+        });
+    </script>
+
+    <!-- HELP LINE -->
+    <script>
+	$("#inline_query_type input[name='queryType']").click(function(){
+	    if($('input:radio[name=queryType]:checked').val() == "GENERAL"){
+	            document.getElementById("refundPart").innerHTML = "";
+	            document.getElementById("helpComment").value = "";
+	    }
+	    else{
+	    	    document.getElementById("helpComment").value = "The order I tried to place on DD-MM-YYYY, at around HH:MM AM/PM was failed. An amount of Rs. XXX was deducted from my account, but the order was not placed. Please initiate refund for the debited amount. I have mentioned the Razorpay Payment ID for your reference.";
+		    document.getElementById("refundPart").innerHTML = '<div class="col-sm-12" style="padding-right: 0; padding-left: 0; margin-bottom: 20px"> <input type="text" class="form-control helpReference" id="helpPaymentReference" placeholder="Payment Reference ID"> </div> <p style=" font-size: 12px; color: #a29871; margin-bottom: 20px">Please note that the Payment Reference ID starts with <b style=" color: #4796da;">pay_</b> and which is not same as your Bank\'s Transaction ID. You would have received this via Email from Razorpay. </p>';
+	    }
+	});
+    </script>
+    
+    <script type="text/javascript">
+        //Characters Left in the comments
+        document.addEventListener("DOMContentLoaded", function(event) {
+          document.getElementById('helpComment').onkeyup = function(){
+            document.getElementById('helpCommentLimit').innerHTML =   (500-(this.value.length))+ ' characters left.';
+          }
+        });
+    </script>
+
+
+</body>
+
+</html>
