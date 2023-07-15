@@ -14,9 +14,9 @@
 
 
 
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>Zaitoon Online</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Zaitoon - IIT Madras</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
     
 <meta name="description" content="Order food online from various outlets of Zaitoon Restaurants across Bangalore, Chennai, Madurai and Qatar. Get exciting offers and deals. Experience fastest food delivery service.">
 <meta name="Keywords" content="Restaurants in Bangalore, Order food online, Home delivery Bangalore, Restaurants in Chennai, Home delivery Chennai, Restaurants in Madurai, Home delivery Madurai, Zaitoon Online, Zaitoon Food Order, Zaitoon Restaurant, Arabian Restaurants in Bangalore, Arabian Restaurants in Chennai, Arabian Restaurants in Madurai, Multicuisine Restaurants Bangalore, Multicuisine Restaurants Chennai">
@@ -24,7 +24,7 @@
 <!-- OG Tags -->
 <meta property="og:title" content="Order food online from Zaitoon">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.zaitoon.online">
+<meta property="og:url" content="https://www.zaitoonrestaurant.com">
 <meta property="og:image" content="#">
 <meta property="og:description" content="Order food online from various outlets of Zaitoon Restaurants across Bangalore, Chennai, Madurai and Qatar. Get exciting offers and deals. Experience fastest food delivery service.">
     
@@ -78,16 +78,22 @@ html {
     
     //To Skip Install App Banner
     function clearInstallAppBanner(){ 
+
+              return; //disabled
+
                //Set cookie
                var d = new Date();
                d.setTime(d.getTime() + 604800000); //7 days
                var expires = "expires="+ d.toUTCString();
                document.cookie = "skipInstallBanner" + "=" + "SKIPPED_FOR_SEVEN_DAYS" + ";" + expires + ";path=/";
                
-               renderAppInstallBanner();
+               //renderAppInstallBanner();
     }
     
     function renderAppInstallBanner(){
+
+      return; //disabled
+
     	if(getMyCookie("skipInstallBanner")){
     		document.getElementById("installAppBannerHolder").style.display = "none";
     		document.getElementById("webDownloadAppBannerHolder").style.display = "none";
@@ -110,7 +116,7 @@ html {
                var expires = "expires="+ d.toUTCString();
                document.cookie = "gstnewcache" + "=" + "GST_NEW_CACHE_CLEARED" + ";" + expires + ";path=/";
                
-               window.location.reload(true);
+               //window.location.reload(true);
     
     }
     
@@ -795,6 +801,8 @@ html {
 
 </head>
 
+
+<!-- DOWNLOAD APP INFO PROMPT-->
 <body onload="checkStatus(); callSetLocation(); renderAppInstallBanner();" ng-app="FullMenu" ng-controller="MenuController" data-spy="scroll" data-target=".bs-sidebar" ng-cloak style="background: #F7F7F7">
 
 
@@ -869,16 +877,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						                </div>
 	
 	                  					
-								<div class="__dd-sec-top struktur" style="display: block" id="remoteNewLocation">
+								<div class="__dd-sec-top struktur" style="display: block; background: #FFF" id="remoteNewLocation">
 									<p style="padding: 0; margin: -8px 0 0 0; font-size: 12px; font-weight: 400; color: #a09f9f; text-transform: uppercase; display: block; width: 100%;">Set Your Location</p>
 									<hr style="border-top: 1px solid #d8d8d8;">
-		                    					<input class="typeahead" google-place-suggestions location="location" style="background: none; width: 100%" type="text" id="locationInput" placeholder="Start typing your location here..." ng-model="googleLocation">
+		                    					<!-- <input class="typeahead" google-place-suggestions location="location" style="background: none; width: 100%" type="text" id="locationInput" placeholder="Start typing your location here..." ng-model="googleLocation"> -->
 		                  				</div>
 		                  				
 		                  				<div class="__dd-sec-bottom" ng-show="popularAreasList.length > 0">
-			                    				<div class="__dropdown-head">POPULAR AREAS</div>
+			                    				<!-- <div class="__dropdown-head">POPULAR AREAS</div> -->
 			                    				<div class="__top-cities">
-		                      					<tag class="popularLocation" ng-click="setLocationFromPopular(popular)" ng-repeat="popular in popularAreasList">{{popular.name}}</tag>
+		                      					<tag class="popularLocation" style="font-size: 14px" ng-click="setLocationFromPopular(popular)" ng-repeat="popular in popularAreasList">{{popular.name}}</tag>
+                                    <p style="margin: 10px 0; font-style: italic;">*Currently serving inside the IIT Madras campus only</p>
 		                  					</div>
 		                				</div>
 	              					</div>
@@ -898,9 +907,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <li class="active">
                         <a href="index.html">Order Now</a>
                     </li>
-                    <li class="myCityA">
+                    <!-- <li class="myCityA">
                         <a href="deals.html">Offers</a>
-                    </li>                         
+                    </li>   -->                       
                     <li ng-if="isLoggedIn" class="myCityA">
                         <a href="account.html">My Account</a>
                     </li>
@@ -912,7 +921,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <a href="#" ng-if="!isLoggedIn" onclick="openLogin()">Login</a>
                     </li>
                     <li>
-                    	<a style="color: #FFF"><i class="fa fa-envelope-o"></i> care@zaitoon.online</a>
+                    	<a style="color: #FFF"><i class="fa fa-envelope-o"></i> hello@thezaitoon.com</a>
                     </li>
                     <!--<li ng-if="isLocationSet" class="myCityA secondLocation">
                         <a href="" data-toggle="modal" data-target="#setLocation"><i class="fa fa-map-marker"></i> {{locationData.location}}, {{locationData.city}}</a>
@@ -924,10 +933,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </header>
 
     <!-- Docs page layout -->
+
     <div class="bs-header" id="content">
         <div class="container">
             <img src="assets/images/elements/designer_logo.png" style="width:70%; max-width:435px">
-            <a data-toggle="modal" href="#promoWindow"><img src="assets/promos/ad_small.png" id="promoSmall" style="width:100%; max-width:322px; float: right; position: absolute; bottom: 0; right: 0; margin-bottom: -40px;"></a>            
+            <!-- <a data-toggle="modal" href="#promoWindow"><img src="assets/promos/ad_small.png" id="promoSmall" style="width:100%; max-width:322px; float: right; position: absolute; bottom: 0; right: 0; margin-bottom: -40px;"></a>             -->
         </div>
     </div>
 
@@ -1241,16 +1251,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						                </div>
 	
 	                  					
-								<div class="__dd-sec-top struktur" style="display: block" id="remoteNewLocation">
-									<p style="padding: 0; margin: -8px 0 0 0; font-size: 12px; font-weight: 400; color: #a09f9f; text-transform: uppercase; display: block; width: 100%;">Set Your Location</p>
+								<div class="__dd-sec-top struktur" style="display: block; background: #FFF" id="remoteNewLocation">
+									<p style="padding: 0; margin: -8px 0 0 0; font-size: 12px; font-weight: 400; color: #a09f9f; text-transform: uppercase; display: block; width: 100%; background: #FFF">Set Your Location</p>
 									<hr style="border-top: 1px solid #d8d8d8;">
-		                    					<input class="typeahead" google-place-suggestions location="location" style="background: none; width: 100%" type="text" id="locationInput" placeholder="Start typing your location here..." ng-model="googleLocation">
+		                    					<!-- <input class="typeahead" google-place-suggestions location="location" style="background: none; width: 100%" type="text" id="locationInput" placeholder="Start typing your location here..." ng-model="googleLocation"> -->
 		                  				</div>
 		                  				
 		                  				<div class="__dd-sec-bottom" ng-show="popularAreasList.length > 0">
-			                    				<div class="__dropdown-head">POPULAR AREAS</div>
+			                    				<!-- <div class="__dropdown-head">POPULAR AREAS</div> -->
 			                    				<div class="__top-cities">
-		                      					<tag class="popularLocation" ng-click="setLocationFromPopular(popular)" ng-repeat="popular in popularAreasList">{{popular.name}}</tag>
+		                      					<tag class="popularLocation" style="font-size: 14px" ng-click="setLocationFromPopular(popular)" ng-repeat="popular in popularAreasList">{{popular.name}}</tag>
+                                    <p style="margin: 10px 0; font-style: italic;">*Currently serving inside the IIT Madras campus only</p>
 		                  					</div>
 		                				</div>
 	              					</div>
