@@ -395,7 +395,7 @@ angular.module('CheckOut', ['ngRoute', 'ngCookies'])
 				    			attemptsCount++;
 				    			if(attemptsCount == 5){
 				    				document.getElementById("paymentTimer").innerHTML = "Failed. Order was not Placed.";
-				    				document.getElementById("paymentNote").innerHTML = "Contact care@zaitoon.online with Reference ID ("+data.transactionID+") for refunding the debited amount.";
+				    				document.getElementById("paymentNote").innerHTML = "Contact hello@thezaitoon.com with Reference ID ("+data.transactionID+") for refunding the debited amount.";
 				    				document.getElementById("paymentWarn").innerHTML = "";
 				    				document.getElementById("loadingDot").style.visibility = 'hidden';
 				    			}
